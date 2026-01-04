@@ -91,12 +91,15 @@ export function EchoEngineDrawer() {
     const handleSendSMS = async () => {
         if (!draft || !hasPhone) return;
         const phone = activeContact?.phoneNumber?.replace(/\s/g, '') || ''; // Remove spaces and handle undefined
-        await logInteraction('sms');
-        celebrate();
+
         toast.success("Opening SMS...");
 
         // Use platform utility for native support
+        // Trigger navigation first to preserve user gesture
         await sendSMS(phone, draft);
+
+        celebrate();
+        await logInteraction('sms');
 
         setTimeout(() => {
             setEngineOpen(false);
@@ -107,11 +110,14 @@ export function EchoEngineDrawer() {
     const handleSendWhatsApp = async () => {
         if (!draft || !hasPhone) return;
         const phone = activeContact?.phoneNumber?.replace(/\D/g, ''); // Remove non-digits
-        await logInteraction('whatsapp');
-        celebrate();
+
         toast.success("Opening WhatsApp...");
 
+        // Trigger navigation first
         window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(draft)}`;
+
+        celebrate();
+        await logInteraction('whatsapp');
 
         setTimeout(() => {
             setEngineOpen(false);
@@ -122,11 +128,14 @@ export function EchoEngineDrawer() {
     const handleSendEmail = async () => {
         if (!draft || !hasEmail) return;
         const email = activeContact?.email;
-        await logInteraction('email');
-        celebrate();
+
         toast.success("Opening Email...");
 
+        // Trigger navigation first
         window.location.href = `mailto:${email}?subject=💕 A little note for you&body=${encodeURIComponent(draft)}`;
+
+        celebrate();
+        await logInteraction('email');
 
         setTimeout(() => {
             setEngineOpen(false);

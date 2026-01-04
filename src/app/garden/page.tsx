@@ -28,7 +28,7 @@ export default function GardenPage() {
                             Echo<span className="gradient-text">Love</span>
                         </h1>
                         <p className="text-sm text-gray-500 font-medium tracking-wide">
-                            {username ? `'s Garden` : 'Your Digital Garden'}
+                            {username ? `${username}'s Garden` : 'Your Digital Garden'}
                         </p>
                     </div>
                     <SettingsDrawer />

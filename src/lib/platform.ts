@@ -23,11 +23,21 @@ export async function sendSMS(phoneNumber: string, message: string) {
         } catch (e) {
             console.error('Failed to send native SMS', e);
             // Fallback
-            window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
+            const link = document.createElement('a');
+            link.href = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            setTimeout(() => document.body.removeChild(link), 100);
             throw e;
         }
     } else {
         // Web fallback
-        window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
+        const link = document.createElement('a');
+        link.href = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => document.body.removeChild(link), 100);
     }
 }
