@@ -113,8 +113,14 @@ export function EchoEngineDrawer() {
 
         toast.success("Opening WhatsApp...");
 
-        // Trigger navigation first
-        window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(draft)}`;
+        // Trigger navigation safely
+        const link = document.createElement('a');
+        link.href = `https://wa.me/${phone}?text=${encodeURIComponent(draft)}`;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
 
         celebrate();
         await logInteraction('whatsapp');
@@ -131,8 +137,12 @@ export function EchoEngineDrawer() {
 
         toast.success("Opening Email...");
 
-        // Trigger navigation first
-        window.location.href = `mailto:${email}?subject=💕 A little note for you&body=${encodeURIComponent(draft)}`;
+        // Trigger navigation safely
+        const link = document.createElement('a');
+        link.href = `mailto:${email}?subject=💕 A little note for you&body=${encodeURIComponent(draft)}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
 
         celebrate();
         await logInteraction('email');

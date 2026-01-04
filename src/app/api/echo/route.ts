@@ -5,10 +5,13 @@ export async function POST(req: Request) {
     try {
         const { contactName, relationship, vibe } = await req.json();
 
+        // Basic sanitization
+        const safeName = contactName?.replace(/[<>]/g, '') || 'Friend';
+
         if (!process.env.GROQ_API_KEY) {
             // Fallback to mock if no API key
             return NextResponse.json({
-                echo: `Hey ${contactName}! Just thinking of you. Hope everything is going great! 💕`
+                echo: `Hey ${safeName}! Just thinking of you. Hope everything is going great! 💕`
             });
         }
 
@@ -39,7 +42,7 @@ export async function POST(req: Request) {
                 },
                 {
                     role: 'user',
-                    content: `Write a ${vibe} message to my ${relationship}, ${contactName}.`,
+                    content: `Write a ${vibe} message to my ${relationship}, ${safeName}.`,
                 },
             ],
             temperature: 0.9,
