@@ -7,13 +7,25 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Settings, X, Key, Trash2, ExternalLink, Sparkles } from 'lucide-react';
+import { Settings, X, Key, Trash2, ExternalLink, Sparkles, LogOut, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { db } from '@/lib/db';
+import { useRouter } from 'next/navigation';
+import { useAppStore } from '@/lib/store';
+import { useLocalAuth } from '@/lib/local-auth';
 
 export function SettingsDrawer() {
-    const [open, setOpen] = useState(false);
+    const { isSettingsOpen, setSettingsOpen } = useAppStore();
     const [showClearConfirm, setShowClearConfirm] = useState(false);
+    const { logout } = useLocalAuth();
+    const router = useRouter();
+
+    const handleLogout = () => {
+        logout();
+        setSettingsOpen(false);
+        toast.success("See you soon! 👋");
+        router.push('/login'); // Should be handled by AuthGuard but explicit is safe
+    };
 
     const handleClearData = async () => {
         try {
@@ -22,14 +34,14 @@ export function SettingsDrawer() {
             await db.drafts.clear();
             toast.success("All data cleared");
             setShowClearConfirm(false);
-            setOpen(false);
+            setSettingsOpen(false);
         } catch {
             toast.error("Failed to clear data");
         }
     };
 
     return (
-        <Drawer open={open} onOpenChange={setOpen}>
+        <Drawer open={isSettingsOpen} onOpenChange={setSettingsOpen}>
             <DrawerTrigger asChild>
                 <button
                     className="w-10 h-10 rounded-full glass-card flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
@@ -72,8 +84,7 @@ export function SettingsDrawer() {
                                     Cancel
                                 </Button>
                                 <Button
-                                    variant="destructive"
-                                    className="flex-1"
+                                    className="flex-1 bg-red-500 hover:bg-red-600 text-white"
                                     onClick={handleClearData}
                                 >
                                     Clear All
@@ -103,19 +114,7 @@ export function SettingsDrawer() {
                                     </h4>
                                     <div className="glass-card p-4 space-y-3">
                                         <p className="text-sm text-gray-600">
-                                            EchoLove uses Groq AI (free!) for message generation.
-                                        </p>
-                                        <a
-                                            href="https://console.groq.com/keys"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1 text-sm text-rose-500 hover:text-rose-600 font-medium"
-                                        >
-                                            Get your free API key
-                                            <ExternalLink className="w-3 h-3" />
-                                        </a>
-                                        <p className="text-xs text-gray-400">
-                                            API key is configured in .env.local file
+                                            EchoLove uses AI to help craft the perfect message for your loved ones.
                                         </p>
                                     </div>
                                 </div>
@@ -135,11 +134,27 @@ export function SettingsDrawer() {
                                         Clear All Data
                                     </Button>
                                 </div>
+
+                                {/* Account */}
+                                <div className="space-y-3">
+                                    <h4 className="text-sm font-semibold text-gray-600 uppercase tracking-wider flex items-center gap-2">
+                                        <User className="w-4 h-4" />
+                                        Account
+                                    </h4>
+                                    <Button
+                                        variant="outline"
+                                        onClick={handleLogout}
+                                        className="w-full text-gray-700 hover:bg-gray-50 border-gray-200"
+                                    >
+                                        <LogOut className="w-4 h-4 mr-2" />
+                                        Log Out
+                                    </Button>
+                                </div>
                             </div>
 
-                            <DrawerFooter className="px-6 pb-10 pt-6">
+                            <DrawerFooter className="px-6 pb-12 pt-6">
                                 <DrawerClose asChild>
-                                    <Button variant="outline" className="w-full rounded-xl">
+                                    <Button variant="outline" className="w-full rounded-xl h-12">
                                         Done
                                     </Button>
                                 </DrawerClose>
@@ -148,6 +163,6 @@ export function SettingsDrawer() {
                     )}
                 </div>
             </DrawerContent>
-        </Drawer>
+        </Drawer >
     );
 }

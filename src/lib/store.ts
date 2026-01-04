@@ -6,6 +6,8 @@ interface AppState {
     setActiveContact: (contact: Contact | null) => void;
     isEngineOpen: boolean;
     setEngineOpen: (open: boolean) => void;
+    isSettingsOpen: boolean;
+    setSettingsOpen: (open: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -13,4 +15,6 @@ export const useAppStore = create<AppState>((set) => ({
     setActiveContact: (contact) => set({ activeContact: contact }),
     isEngineOpen: false,
     setEngineOpen: (open) => set({ isEngineOpen: open }),
+    isSettingsOpen: false,
+    setSettingsOpen: (open) => set({ isSettingsOpen: open }),
 }));

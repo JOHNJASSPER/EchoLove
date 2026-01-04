@@ -36,7 +36,7 @@ export function PulseTimeline() {
         .filter((b) => b.daysUntil <= 30)
         .sort((a, b) => a.daysUntil - b.daysUntil);
 
-    if (upcomingBirthdays.length === 0) return null;
+    // if (upcomingBirthdays.length === 0) return null; // Previous behavior hidden the section
 
     const handleClick = (contact: Contact) => {
         setActiveContact(contact);
@@ -52,52 +52,61 @@ export function PulseTimeline() {
                 </h2>
             </div>
 
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-6 px-6 scrollbar-hide">
-                {upcomingBirthdays.map(({ contact, daysUntil }) => (
-                    <motion.button
-                        key={contact.id}
-                        onClick={() => handleClick(contact)}
-                        whileTap={{ scale: 0.95 }}
-                        className={cn(
-                            "flex-shrink-0 w-24 p-3 rounded-2xl text-center transition-all",
-                            daysUntil === 0
-                                ? "bg-gradient-to-br from-rose-500 to-pink-500 text-white shadow-lg shadow-rose-500/30"
-                                : daysUntil <= 7
-                                    ? "glass-card border-rose-200"
-                                    : "glass-card"
-                        )}
-                    >
-                        <div className={cn(
-                            "w-10 h-10 mx-auto rounded-full flex items-center justify-center mb-2",
-                            daysUntil === 0 ? "bg-white/20" : "bg-rose-100"
-                        )}>
-                            <Cake className={cn(
-                                "w-5 h-5",
-                                daysUntil === 0 ? "text-white" : "text-rose-500"
-                            )} />
-                        </div>
+            {upcomingBirthdays.length === 0 ? (
+                <div className="glass-card p-4 text-center">
+                    <p className="text-sm text-gray-500 italic">
+                        No upcoming birthdays soon. <br />
+                        Plant more seeds in your garden! 🌱
+                    </p>
+                </div>
+            ) : (
+                <div className="flex gap-3 overflow-x-auto pb-2 -mx-6 px-6 scrollbar-hide">
+                    {upcomingBirthdays.map(({ contact, daysUntil }) => (
+                        <motion.button
+                            key={contact.id}
+                            onClick={() => handleClick(contact)}
+                            whileTap={{ scale: 0.95 }}
+                            className={cn(
+                                "flex-shrink-0 w-24 p-3 rounded-2xl text-center transition-all",
+                                daysUntil === 0
+                                    ? "bg-gradient-to-br from-rose-500 to-pink-500 text-white shadow-lg shadow-rose-500/30"
+                                    : daysUntil <= 7
+                                        ? "glass-card border-rose-200"
+                                        : "glass-card"
+                            )}
+                        >
+                            <div className={cn(
+                                "w-10 h-10 mx-auto rounded-full flex items-center justify-center mb-2",
+                                daysUntil === 0 ? "bg-white/20" : "bg-rose-100"
+                            )}>
+                                <Cake className={cn(
+                                    "w-5 h-5",
+                                    daysUntil === 0 ? "text-white" : "text-rose-500"
+                                )} />
+                            </div>
 
-                        <p className={cn(
-                            "text-xs font-bold truncate",
-                            daysUntil === 0 ? "text-white" : "text-gray-800"
-                        )}>
-                            {contact.name.split(' ')[0]}
-                        </p>
+                            <p className={cn(
+                                "text-xs font-bold truncate",
+                                daysUntil === 0 ? "text-white" : "text-gray-800"
+                            )}>
+                                {contact.name.split(' ')[0]}
+                            </p>
 
-                        <p className={cn(
-                            "text-[10px] font-medium mt-0.5",
-                            daysUntil === 0 ? "text-white/80" : "text-gray-500"
-                        )}>
-                            {daysUntil === 0
-                                ? "Today! 🎉"
-                                : daysUntil === 1
-                                    ? "Tomorrow"
-                                    : `${daysUntil} days`
-                            }
-                        </p>
-                    </motion.button>
-                ))}
-            </div>
+                            <p className={cn(
+                                "text-[10px] font-medium mt-0.5",
+                                daysUntil === 0 ? "text-white/80" : "text-gray-500"
+                            )}>
+                                {daysUntil === 0
+                                    ? "Today! 🎉"
+                                    : daysUntil === 1
+                                        ? "Tomorrow"
+                                        : `${daysUntil} days`
+                                }
+                            </p>
+                        </motion.button>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

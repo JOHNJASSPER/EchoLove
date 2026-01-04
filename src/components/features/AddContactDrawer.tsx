@@ -124,7 +124,7 @@ export function AddContactDrawer({ children }: { children?: React.ReactNode }) {
                                 <SelectTrigger className="bg-white/50">
                                     <SelectValue placeholder="Select type" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="bg-white z-[60]">
                                     <SelectItem value="partner">Partner 💕</SelectItem>
                                     <SelectItem value="family">Family 👨‍👩‍👧</SelectItem>
                                     <SelectItem value="friend">Friend 👯</SelectItem>
@@ -157,8 +157,8 @@ export function AddContactDrawer({ children }: { children?: React.ReactNode }) {
                                         key={v}
                                         onClick={() => setVibe(v)}
                                         className={`py-2 rounded-xl border text-xs font-medium transition-all capitalize ${vibe === v
-                                                ? 'bg-rose-500 text-white border-rose-500 shadow-lg'
-                                                : 'bg-white border-gray-200 text-gray-600'
+                                            ? 'bg-rose-500 text-white border-rose-500 shadow-lg'
+                                            : 'bg-white border-gray-200 text-gray-600'
                                             }`}
                                     >
                                         {v}

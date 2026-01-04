@@ -3,9 +3,33 @@
 import { Home, Sparkles, User, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { useAppStore } from '@/lib/store';
 
 export function BottomNav() {
     const [active, setActive] = useState('home');
+    const { setEngineOpen, setSettingsOpen, activeContact } = useAppStore();
+
+    const handleNav = (id: string) => {
+        setActive(id);
+
+        switch (id) {
+            case 'home':
+                setEngineOpen(false);
+                setSettingsOpen(false);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                break;
+            case 'engine':
+                if (activeContact) {
+                    setEngineOpen(true);
+                } else {
+                    // Shake effect or toast could go here
+                }
+                break;
+            case 'profile':
+                setSettingsOpen(true);
+                break;
+        }
+    };
 
     const navItems = [
         { id: 'home', icon: Home, label: 'Garden' },
@@ -21,7 +45,7 @@ export function BottomNav() {
                     return (
                         <button
                             key={item.id}
-                            onClick={() => setActive(item.id)}
+                            onClick={() => handleNav(item.id)}
                             className="relative flex flex-col items-center justify-center w-12 h-12"
                         >
                             {isActive && (

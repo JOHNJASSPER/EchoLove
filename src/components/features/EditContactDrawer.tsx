@@ -155,7 +155,7 @@ export function EditContactDrawer({ contact, open, onOpenChange }: EditContactDr
                                         <SelectTrigger>
                                             <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent>
+                                        <SelectContent className="bg-white z-[60]">
                                             <SelectItem value="partner">Partner 💕</SelectItem>
                                             <SelectItem value="family">Family 👨‍👩‍👧</SelectItem>
                                             <SelectItem value="friend">Friend 👯</SelectItem>
@@ -183,7 +183,7 @@ export function EditContactDrawer({ contact, open, onOpenChange }: EditContactDr
                                         <SelectTrigger>
                                             <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent>
+                                        <SelectContent className="bg-white z-[60]">
                                             <SelectItem value="sweet">Sweet 🍬</SelectItem>
                                             <SelectItem value="chill">Chill 😎</SelectItem>
                                             <SelectItem value="playful">Playful 🎭</SelectItem>

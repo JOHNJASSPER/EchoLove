@@ -41,7 +41,7 @@ export default function GardenPage() {
                 <OrbitGrid />
 
                 {/* Floating Action Button (FAB) */}
-                <div className="fixed bottom-24 right-6 z-40">
+                <div className="fixed bottom-28 right-6 z-40">
                     <AddContactDrawer>
                         <button
                             aria-label="Add new contact"
