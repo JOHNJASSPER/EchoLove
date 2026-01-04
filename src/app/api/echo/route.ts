@@ -1,10 +1,6 @@
 import Groq from 'groq-sdk';
 import { NextResponse } from 'next/server';
 
-const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY,
-});
-
 export async function POST(req: Request) {
     try {
         const { contactName, relationship, vibe } = await req.json();
@@ -15,6 +11,10 @@ export async function POST(req: Request) {
                 echo: `Hey ${contactName}! Just thinking of you. Hope everything is going great! 💕`
             });
         }
+
+        const groq = new Groq({
+            apiKey: process.env.GROQ_API_KEY,
+        });
 
         const response = await groq.chat.completions.create({
             model: 'llama-3.3-70b-versatile',
