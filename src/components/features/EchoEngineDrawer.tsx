@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
 import { sendSMS } from '@/lib/platform';
 import { LocalNotifications } from '@capacitor/local-notifications';
+import { getUpcomingHolidays } from '@/lib/holidays';
 
 export function EchoEngineDrawer() {
     const { activeContact, isEngineOpen, setEngineOpen } = useAppStore();
@@ -32,10 +33,6 @@ export function EchoEngineDrawer() {
     const hasPhone = Boolean(activeContact?.phoneNumber);
     const hasEmail = Boolean(activeContact?.email);
     const hasAnyContact = hasPhone || hasEmail;
-
-    import { getUpcomingHolidays } from '@/lib/holidays';
-
-    // ... (inside component)
 
     const generateEcho = async () => {
         if (!activeContact) return;
@@ -186,7 +183,7 @@ export function EchoEngineDrawer() {
                 const title = `Time to water ${activeContact.name}! 💕`;
 
                 // Schedule logic
-                let scheduleTime = new Date();
+                const scheduleTime = new Date();
                 scheduleTime.setHours(hours, minutes, 0, 0);
 
                 if (scheduleTime <= now) {
@@ -200,7 +197,7 @@ export function EchoEngineDrawer() {
                             body: "Tap to send a loving message",
                             id: Math.floor(Math.random() * 1000000),
                             schedule: { at: scheduleTime },
-                            sound: "beep.wav",
+                            sound: "echolove_chime.wav",
                             actionTypeId: "",
                             extra: {
                                 contactId: activeContact.id
@@ -284,7 +281,7 @@ export function EchoEngineDrawer() {
                                         </Button>
                                     </div>
                                     <p className="text-xs text-gray-500">
-                                        You'll get a notification to send a message at this time
+                                        You&apos;ll get a notification to send a message at this time
                                     </p>
                                 </motion.div>
                             )}
