@@ -88,7 +88,7 @@ export function AddContactDrawer({ children }: { children?: React.ReactNode }) {
                     </Button>
                 )}
             </DrawerTrigger>
-            <DrawerContent className="bg-white backdrop-blur-xl">
+            <DrawerContent className="bg-white backdrop-blur-xl min-h-[55vh]">
                 <div className="mx-auto w-full max-w-sm">
                     <DrawerHeader className="py-3">
                         <DrawerTitle className="text-lg font-bold text-center">
