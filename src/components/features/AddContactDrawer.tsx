@@ -163,8 +163,8 @@ export function AddContactDrawer({ children }: { children?: React.ReactNode }) {
                                                 key={rel.value}
                                                 onClick={() => setRelationship(rel.value)}
                                                 className={`p-3 rounded-xl border-2 text-center transition-all ${relationship === rel.value
-                                                        ? 'border-rose-500 bg-rose-50'
-                                                        : 'border-gray-100 bg-white hover:border-gray-200'
+                                                    ? 'border-rose-500 bg-rose-50'
+                                                    : 'border-gray-100 bg-white hover:border-gray-200'
                                                     }`}
                                             >
                                                 <span className="text-xl">{rel.emoji}</span>
@@ -240,12 +240,12 @@ export function AddContactDrawer({ children }: { children?: React.ReactNode }) {
                                                             <button
                                                                 key={v.value}
                                                                 onClick={() => setVibe(v.value)}
-                                                                className={`flex-1 py-2 rounded-xl text-sm transition-all ${vibe === v.value
-                                                                        ? 'bg-rose-500 text-white'
-                                                                        : 'bg-gray-100 text-gray-600'
+                                                                className={`flex-1 py-2 rounded-xl text-xs font-medium transition-all ${vibe === v.value
+                                                                    ? 'bg-rose-500 text-white'
+                                                                    : 'bg-gray-100 text-gray-600'
                                                                     }`}
                                                             >
-                                                                {v.emoji}
+                                                                {v.label}
                                                             </button>
                                                         ))}
                                                     </div>
