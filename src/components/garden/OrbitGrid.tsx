@@ -12,6 +12,7 @@ export function OrbitGrid() {
     const contacts = useLiveQuery(() => db.contacts.toArray());
     const setActiveContact = useAppStore((state) => state.setActiveContact);
     const setEngineOpen = useAppStore((state) => state.setEngineOpen);
+    const setEventContext = useAppStore((state) => state.setEventContext);
 
     // Show skeleton while loading
     if (contacts === undefined) {
@@ -59,6 +60,7 @@ export function OrbitGrid() {
                         <PlantCard
                             contact={contact}
                             onClick={() => {
+                                setEventContext(null); // Clear any previous context
                                 setActiveContact(contact);
                                 setEngineOpen(true);
                             }}
