@@ -1,6 +1,8 @@
 import Groq from 'groq-sdk';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: Request) {
     try {
         const { contactName, relationship, vibe } = await req.json();
@@ -9,10 +11,15 @@ export async function POST(req: Request) {
         const safeName = contactName?.replace(/[<>]/g, '') || 'Friend';
 
         if (!process.env.GROQ_API_KEY) {
-            // Fallback to mock if no API key
-            return NextResponse.json({
-                echo: `Hey ${safeName}! Just thinking of you. Hope everything is going great! 💕`
-            });
+            const FALLBACKS = [
+                `Hey ${safeName}! Just thinking of you. Hope everything is going great! 💕`,
+                `Miss you ${safeName}! Sending you a virtual hug. 🤗`,
+                `Hope you're having an awesome day, ${safeName}! ✨`,
+                `Just wanted to say hi and check in on you, ${safeName}. ❤️`
+            ];
+            const randomFallback = FALLBACKS[Math.floor(Math.random() * FALLBACKS.length)];
+
+            return NextResponse.json({ echo: randomFallback });
         }
 
         const groq = new Groq({
@@ -54,8 +61,14 @@ export async function POST(req: Request) {
     } catch (error: unknown) {
         // Log generic error for production safety
         console.error('Groq Generation Failed');
+        const FALLBACKS = [
+            "Sending you love and good vibes today! 💕",
+            "Just wanted to send a little sunshine your way. ☀️",
+            "Thinking of you! Hope your day is magical. ✨",
+            "Hey! Just a reminder that you're awesome. 💖"
+        ];
         return NextResponse.json(
-            { echo: "Sending you love and good vibes today! 💕" },
+            { echo: FALLBACKS[Math.floor(Math.random() * FALLBACKS.length)] },
             { status: 200 }
         );
     }

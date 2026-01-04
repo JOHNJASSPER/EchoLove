@@ -37,9 +37,11 @@ export function EchoEngineDrawer() {
         setIsGenerating(true);
         setIsManual(false);
         try {
-            const response = await fetch('/api/echo', {
+            // Add timestamp to prevent aggressive mobile caching
+            const response = await fetch(`/api/echo?ts=${Date.now()}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                cache: 'no-store',
                 body: JSON.stringify({
                     contactName: activeContact.name,
                     relationship: activeContact.relationship,
@@ -55,8 +57,15 @@ export function EchoEngineDrawer() {
             }
         } catch {
             // Log generic error internally if needed
-            toast.error("AI generation failed. Using fallback message.");
-            setDraft(`Thinking of you, ${activeContact.name}! Hope your day is going great. 💕`);
+            toast.error("AI connection spotty. Using offline inspiration! ✨");
+            const FALLBACKS = [
+                `Thinking of you, ${activeContact.name}! Hope your day is going great. 💕`,
+                `Hey ${activeContact.name}, sending you a big hug! 🤗`,
+                `Just wanted to say I appreciate you, ${activeContact.name}. ✨`,
+                `Hope you're smiling today, ${activeContact.name}! 😊`,
+                `Sending some good vibes your way, ${activeContact.name} ~ 🌟`
+            ];
+            setDraft(FALLBACKS[Math.floor(Math.random() * FALLBACKS.length)]);
         } finally {
             setIsGenerating(false);
         }
@@ -208,9 +217,7 @@ export function EchoEngineDrawer() {
                                 <div className="flex items-center gap-2 mt-1">
                                     {hasPhone && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">📱 SMS</span>}
                                     {hasEmail && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">✉️ Email</span>}
-                                    {!hasAnyContact && (
-                                        <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">⚠️ Add contact info</span>
-                                    )}
+                                    <span className="text-[10px] text-gray-300">v1.1</span>
                                 </div>
                             </div>
                             <div className="flex gap-1">
@@ -359,7 +366,7 @@ export function EchoEngineDrawer() {
                                 disabled={isGenerating}
                             >
                                 <Sparkles className="w-5 h-5 mr-2" />
-                                Generate Echo
+                                Generate Spark ✨
                             </Button>
                         ) : draft ? (
                             <div className="space-y-3">
