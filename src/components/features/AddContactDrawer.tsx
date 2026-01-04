@@ -100,15 +100,15 @@ export function AddContactDrawer({ children }: { children?: React.ReactNode }) {
                     </Button>
                 )}
             </DrawerTrigger>
-            <DrawerContent className="bg-white/95 backdrop-blur-xl">
-                <div className="mx-auto w-full max-w-sm">
-                    <DrawerHeader>
-                        <DrawerTitle className="text-2xl font-bold text-center">
+            <DrawerContent className="bg-white/95 backdrop-blur-xl max-h-[70vh]">
+                <div className="mx-auto w-full max-w-sm flex flex-col">
+                    <DrawerHeader className="pb-2">
+                        <DrawerTitle className="text-xl font-bold text-center">
                             <Sparkles className="w-5 h-5 text-rose-500 inline mr-2" />
                             Plant a Seed
                         </DrawerTitle>
                         {/* Progress dots */}
-                        <div className="flex justify-center gap-2 mt-3">
+                        <div className="flex justify-center gap-2 mt-2">
                             {[1, 2, 3].map((s) => (
                                 <div
                                     key={s}
@@ -119,7 +119,7 @@ export function AddContactDrawer({ children }: { children?: React.ReactNode }) {
                         </div>
                     </DrawerHeader>
 
-                    <div className="p-6 min-h-[280px]">
+                    <div className="p-4 flex-1 overflow-y-auto">
                         <AnimatePresence mode="wait">
                             {/* STEP 1: Name */}
                             {step === 1 && (
@@ -128,15 +128,15 @@ export function AddContactDrawer({ children }: { children?: React.ReactNode }) {
                                     initial={{ opacity: 0, x: 20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: -20 }}
-                                    className="space-y-4"
+                                    className="space-y-3"
                                 >
-                                    <Label className="text-lg font-medium text-gray-700">
+                                    <Label className="text-base font-medium text-gray-700 block text-center">
                                         Who do you want to stay connected with?
                                     </Label>
                                     <Input
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
-                                        className="bg-white/50 text-xl py-6 text-center"
+                                        className="bg-white/50 text-lg py-5 text-center"
                                         placeholder="Mom, Sarah, Bestie..."
                                         autoFocus
                                     />
@@ -161,8 +161,8 @@ export function AddContactDrawer({ children }: { children?: React.ReactNode }) {
                                                 key={rel.value}
                                                 onClick={() => setRelationship(rel.value)}
                                                 className={`p-4 rounded-2xl border-2 text-left transition-all ${relationship === rel.value
-                                                        ? 'border-rose-500 bg-rose-50'
-                                                        : 'border-gray-100 bg-white hover:border-gray-200'
+                                                    ? 'border-rose-500 bg-rose-50'
+                                                    : 'border-gray-100 bg-white hover:border-gray-200'
                                                     }`}
                                             >
                                                 <span className="text-2xl">{rel.emoji}</span>
@@ -239,8 +239,8 @@ export function AddContactDrawer({ children }: { children?: React.ReactNode }) {
                                                                 key={v.value}
                                                                 onClick={() => setVibe(v.value)}
                                                                 className={`flex-1 py-2 rounded-xl text-sm transition-all ${vibe === v.value
-                                                                        ? 'bg-rose-500 text-white'
-                                                                        : 'bg-gray-100 text-gray-600'
+                                                                    ? 'bg-rose-500 text-white'
+                                                                    : 'bg-gray-100 text-gray-600'
                                                                     }`}
                                                             >
                                                                 {v.emoji}
@@ -256,7 +256,7 @@ export function AddContactDrawer({ children }: { children?: React.ReactNode }) {
                         </AnimatePresence>
                     </div>
 
-                    <DrawerFooter className="px-6 pb-8">
+                    <DrawerFooter className="px-4 pb-4 pt-2">
                         <div className="flex gap-3">
                             {step > 1 && (
                                 <Button
