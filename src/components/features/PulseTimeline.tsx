@@ -17,7 +17,7 @@ type PulseItem =
 
 export function PulseTimeline() {
     const contacts = useLiveQuery(() => db.contacts.toArray());
-    const { setActiveContact, setEngineOpen, setCalendarOpen } = useAppStore();
+    const { setActiveContact, setEngineOpen, setCalendarOpen, setEventContext, setHolidayName } = useAppStore();
 
     if (!contacts) return null;
 
@@ -52,11 +52,16 @@ export function PulseTimeline() {
         .sort((a, b) => a.daysUntil - b.daysUntil);
 
     const handleBirthdayClick = (contact: Contact) => {
+        setEventContext('birthday');
+        setHolidayName(null);
         setActiveContact(contact);
         setEngineOpen(true);
     };
 
     const handleHolidayClick = (holiday: Holiday) => {
+        setEventContext('holiday');
+        setHolidayName(holiday.name);
+        // Scroll to garden to pick a contact
         toast.success(`It's almost ${holiday.name}! Tap a contact to send some love. 💖`);
         const gardenGrid = document.getElementById('garden-grid');
         if (gardenGrid) {

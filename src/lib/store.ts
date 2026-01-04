@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { Contact } from './db';
 
+export type EventContext = 'birthday' | 'holiday' | 'motivation' | null;
+
 interface AppState {
     activeContact: Contact | null;
     setActiveContact: (contact: Contact | null) => void;
@@ -10,6 +12,10 @@ interface AppState {
     setSettingsOpen: (open: boolean) => void;
     isCalendarOpen: boolean;
     setCalendarOpen: (open: boolean) => void;
+    eventContext: EventContext;
+    setEventContext: (context: EventContext) => void;
+    holidayName: string | null;
+    setHolidayName: (name: string | null) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -21,4 +27,8 @@ export const useAppStore = create<AppState>((set) => ({
     setSettingsOpen: (open) => set({ isSettingsOpen: open }),
     isCalendarOpen: false,
     setCalendarOpen: (open) => set({ isCalendarOpen: open }),
+    eventContext: null,
+    setEventContext: (context) => set({ eventContext: context }),
+    holidayName: null,
+    setHolidayName: (name) => set({ holidayName: name }),
 }));

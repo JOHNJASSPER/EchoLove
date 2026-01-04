@@ -21,9 +21,8 @@ import { Capacitor } from '@capacitor/core';
 import { getUpcomingHolidays } from '@/lib/holidays';
 
 export function EchoEngineDrawer() {
-    const { activeContact, isEngineOpen, setEngineOpen } = useAppStore();
+    const { activeContact, isEngineOpen, setEngineOpen, eventContext, holidayName, setEventContext } = useAppStore();
     const [vibe, setVibe] = useState('chill');
-    const [messageType, setMessageType] = useState('checkin');
     const [draft, setDraft] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [isManual, setIsManual] = useState(false);
@@ -59,6 +58,11 @@ export function EchoEngineDrawer() {
             // Ignore if table doesn't exist yet
         }
 
+        // Determine message type from context
+        const messageType = eventContext === 'birthday' ? 'birthday'
+            : eventContext === 'holiday' ? 'love'
+                : 'checkin';
+
         try {
             const response = await fetch(`/api/echo?ts=${Date.now()}`, {
                 method: 'POST',
@@ -68,7 +72,7 @@ export function EchoEngineDrawer() {
                     contactName: activeContact.name,
                     relationship: activeContact.relationship,
                     vibe: vibe,
-                    holiday: activeHoliday,
+                    holiday: holidayName || activeHoliday,
                     messageType: messageType,
                     recentMessages
                 }),
@@ -377,27 +381,14 @@ export function EchoEngineDrawer() {
                         {/* Vibe Selection (AI mode only) */}
                         {!isManual && (
                             <div className="space-y-4">
-                                {/* Message Type Selector */}
-                                <div className="space-y-2">
-                                    <Label className="text-sm font-medium text-gray-600">Message Type</Label>
-                                    <div className="grid grid-cols-4 gap-2">
-                                        {[
-                                            { value: 'checkin', label: '👋', name: 'Check-in' },
-                                            { value: 'love', label: '❤️', name: 'Love' },
-                                            { value: 'birthday', label: '🎂', name: 'Birthday' },
-                                            { value: 'motivation', label: '💪', name: 'Motivate' },
-                                        ].map((type) => (
-                                            <button
-                                                key={type.value}
-                                                onClick={() => setMessageType(type.value)}
-                                                className={`py-2 px-1 rounded-xl text-center transition-all ${messageType === type.value ? 'bg-rose-500 text-white shadow-lg' : 'bg-gray-100 text-gray-600'}`}
-                                            >
-                                                <span className="text-lg">{type.label}</span>
-                                                <p className="text-[10px] font-medium mt-0.5">{type.name}</p>
-                                            </button>
-                                        ))}
+                                {/* Show context badge if event is set */}
+                                {eventContext && (
+                                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                                        <span className="px-2 py-1 bg-rose-100 text-rose-600 rounded-full text-xs font-medium">
+                                            {eventContext === 'birthday' ? '🎂 Birthday Message' : eventContext === 'holiday' ? `💕 ${holidayName || 'Holiday'} Message` : '💪 Motivation'}
+                                        </span>
                                     </div>
-                                </div>
+                                )}
                                 <VibeSlider value={vibe} onChange={setVibe} />
                             </div>
                         )}
