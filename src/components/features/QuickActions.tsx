@@ -45,7 +45,7 @@ export function QuickActions() {
                     whileTap={{ scale: 0.95 }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0, transition: { delay: i * 0.1 } }}
-                    className={`flex-1 p-4 rounded-2xl bg-gradient-to-br ${action.color} text-white shadow-lg flex flex-col items-center gap-2`}
+                    className={`flex-1 py-4 px-3 rounded-2xl bg-gradient-to-br ${action.color} text-white shadow-lg flex flex-col items-center gap-2`}
                 >
                     <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                         {action.icon}

@@ -6,16 +6,33 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-    Select, SelectContent, SelectItem, SelectTrigger, SelectValue
-} from '@/components/ui/select';
-import {
     Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger, DrawerFooter, DrawerClose
 } from '@/components/ui/drawer';
-import { Plus, Cake, Sparkles, Phone, Mail } from 'lucide-react';
+import { Plus, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const RELATIONSHIPS = [
+    { value: 'partner', label: 'Partner', emoji: '💕' },
+    { value: 'family', label: 'Family', emoji: '👨‍👩‍👧' },
+    { value: 'friend', label: 'Friend', emoji: '👯' },
+    { value: 'colleague', label: 'Colleague', emoji: '💼' },
+    { value: 'mentor', label: 'Mentor', emoji: '🎓' },
+];
+
+const VIBES = [
+    { value: 'sweet', label: 'Sweet', emoji: '🥰' },
+    { value: 'chill', label: 'Chill', emoji: '😎' },
+    { value: 'playful', label: 'Playful', emoji: '🎉' },
+    { value: 'deep', label: 'Deep', emoji: '💭' },
+];
 
 export function AddContactDrawer({ children }: { children?: React.ReactNode }) {
     const [open, setOpen] = useState(false);
+    const [step, setStep] = useState(1);
+    const [showOptional, setShowOptional] = useState(false);
+
+    // Form state
     const [name, setName] = useState('');
     const [relationship, setRelationship] = useState('');
     const [vibe, setVibe] = useState('chill');
@@ -47,13 +64,31 @@ export function AddContactDrawer({ children }: { children?: React.ReactNode }) {
         });
 
         toast.success("Planted in your garden! 🌱");
+        resetAndClose();
+    };
+
+    const resetAndClose = () => {
         setOpen(false);
+        setStep(1);
         setName('');
         setRelationship('');
         setPhoneNumber('');
         setEmail('');
         setBirthday('');
         setVibe('chill');
+        setShowOptional(false);
+    };
+
+    const goNext = () => {
+        if (step === 1 && !name) {
+            toast.error("What's their name?");
+            return;
+        }
+        if (step === 2 && !relationship) {
+            toast.error("Pick a relationship type");
+            return;
+        }
+        setStep(step + 1);
     };
 
     return (
@@ -65,119 +100,192 @@ export function AddContactDrawer({ children }: { children?: React.ReactNode }) {
                     </Button>
                 )}
             </DrawerTrigger>
-            <DrawerContent className="bg-white/95 backdrop-blur-xl h-[90vh]">
-                <div className="mx-auto w-full max-w-sm overflow-y-auto">
+            <DrawerContent className="bg-white/95 backdrop-blur-xl">
+                <div className="mx-auto w-full max-w-sm">
                     <DrawerHeader>
-                        <DrawerTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
-                            <Sparkles className="w-5 h-5 text-rose-500" />
-                            Plant a new seed
+                        <DrawerTitle className="text-2xl font-bold text-center">
+                            <Sparkles className="w-5 h-5 text-rose-500 inline mr-2" />
+                            Plant a Seed
                         </DrawerTitle>
+                        {/* Progress dots */}
+                        <div className="flex justify-center gap-2 mt-3">
+                            {[1, 2, 3].map((s) => (
+                                <div
+                                    key={s}
+                                    className={`w-2 h-2 rounded-full transition-all ${s === step ? 'bg-rose-500 w-6' : s < step ? 'bg-rose-300' : 'bg-gray-200'
+                                        }`}
+                                />
+                            ))}
+                        </div>
                     </DrawerHeader>
 
-                    <div className="p-4 space-y-4">
-                        {/* Name */}
-                        <div className="space-y-2">
-                            <Label>Name *</Label>
-                            <Input
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="bg-white/50 text-lg py-6"
-                                placeholder="Mom, Partner, Bestie..."
-                            />
-                        </div>
+                    <div className="p-6 min-h-[280px]">
+                        <AnimatePresence mode="wait">
+                            {/* STEP 1: Name */}
+                            {step === 1 && (
+                                <motion.div
+                                    key="step1"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    className="space-y-4"
+                                >
+                                    <Label className="text-lg font-medium text-gray-700">
+                                        Who do you want to stay connected with?
+                                    </Label>
+                                    <Input
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        className="bg-white/50 text-xl py-6 text-center"
+                                        placeholder="Mom, Sarah, Bestie..."
+                                        autoFocus
+                                    />
+                                </motion.div>
+                            )}
 
-                        {/* Phone Number */}
-                        <div className="space-y-2">
-                            <Label className="flex items-center gap-2">
-                                <Phone className="w-4 h-4 text-green-500" />
-                                Phone Number
-                            </Label>
-                            <Input
-                                type="tel"
-                                value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value)}
-                                className="bg-white/50"
-                                placeholder="+1234567890"
-                            />
-                            <p className="text-xs text-gray-400">For SMS & WhatsApp</p>
-                        </div>
+                            {/* STEP 2: Relationship */}
+                            {step === 2 && (
+                                <motion.div
+                                    key="step2"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    className="space-y-4"
+                                >
+                                    <Label className="text-lg font-medium text-gray-700">
+                                        How do you know {name}?
+                                    </Label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {RELATIONSHIPS.map((rel) => (
+                                            <button
+                                                key={rel.value}
+                                                onClick={() => setRelationship(rel.value)}
+                                                className={`p-4 rounded-2xl border-2 text-left transition-all ${relationship === rel.value
+                                                        ? 'border-rose-500 bg-rose-50'
+                                                        : 'border-gray-100 bg-white hover:border-gray-200'
+                                                    }`}
+                                            >
+                                                <span className="text-2xl">{rel.emoji}</span>
+                                                <p className="font-medium mt-1">{rel.label}</p>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
 
-                        {/* Email */}
-                        <div className="space-y-2">
-                            <Label className="flex items-center gap-2">
-                                <Mail className="w-4 h-4 text-blue-500" />
-                                Email
-                            </Label>
-                            <Input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="bg-white/50"
-                                placeholder="love@example.com"
-                            />
-                        </div>
+                            {/* STEP 3: Contact Info + Extras */}
+                            {step === 3 && (
+                                <motion.div
+                                    key="step3"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    className="space-y-4"
+                                >
+                                    <Label className="text-lg font-medium text-gray-700">
+                                        How do you reach {name}?
+                                    </Label>
 
-                        {/* Relationship */}
-                        <div className="space-y-2">
-                            <Label>Relationship *</Label>
-                            <Select onValueChange={setRelationship} value={relationship}>
-                                <SelectTrigger className="bg-white/50">
-                                    <SelectValue placeholder="Select type" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-white z-[60]">
-                                    <SelectItem value="partner">Partner 💕</SelectItem>
-                                    <SelectItem value="family">Family 👨‍👩‍👧</SelectItem>
-                                    <SelectItem value="friend">Friend 👯</SelectItem>
-                                    <SelectItem value="colleague">Colleague 💼</SelectItem>
-                                    <SelectItem value="mentor">Mentor 🎓</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                                    <Input
+                                        type="tel"
+                                        value={phoneNumber}
+                                        onChange={(e) => setPhoneNumber(e.target.value)}
+                                        className="bg-white/50 py-5"
+                                        placeholder="📱 Phone number"
+                                    />
 
-                        {/* Birthday */}
-                        <div className="space-y-2">
-                            <Label className="flex items-center gap-2">
-                                <Cake className="w-4 h-4 text-rose-400" />
-                                Birthday (Optional)
-                            </Label>
-                            <Input
-                                type="date"
-                                value={birthday}
-                                onChange={(e) => setBirthday(e.target.value)}
-                                className="bg-white/50"
-                            />
-                        </div>
+                                    <div className="text-center text-gray-400 text-sm">or</div>
 
-                        {/* Vibe */}
-                        <div className="space-y-2">
-                            <Label>Default Vibe</Label>
-                            <div className="grid grid-cols-4 gap-2">
-                                {(['sweet', 'chill', 'playful', 'deep'] as const).map((v) => (
+                                    <Input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="bg-white/50 py-5"
+                                        placeholder="✉️ Email address"
+                                    />
+
+                                    {/* Optional Section */}
                                     <button
-                                        key={v}
-                                        onClick={() => setVibe(v)}
-                                        className={`py-2 rounded-xl border text-xs font-medium transition-all capitalize ${vibe === v
-                                            ? 'bg-rose-500 text-white border-rose-500 shadow-lg'
-                                            : 'bg-white border-gray-200 text-gray-600'
-                                            }`}
+                                        onClick={() => setShowOptional(!showOptional)}
+                                        className="flex items-center gap-2 text-sm text-gray-500 mx-auto mt-4"
                                     >
-                                        {v}
+                                        More options
+                                        {showOptional ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                                     </button>
-                                ))}
-                            </div>
-                        </div>
+
+                                    <AnimatePresence>
+                                        {showOptional && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                className="space-y-4 overflow-hidden"
+                                            >
+                                                <div className="space-y-2">
+                                                    <Label className="text-sm text-gray-500">Birthday</Label>
+                                                    <Input
+                                                        type="date"
+                                                        value={birthday}
+                                                        onChange={(e) => setBirthday(e.target.value)}
+                                                        className="bg-white/50"
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label className="text-sm text-gray-500">Default Vibe</Label>
+                                                    <div className="flex gap-2">
+                                                        {VIBES.map((v) => (
+                                                            <button
+                                                                key={v.value}
+                                                                onClick={() => setVibe(v.value)}
+                                                                className={`flex-1 py-2 rounded-xl text-sm transition-all ${vibe === v.value
+                                                                        ? 'bg-rose-500 text-white'
+                                                                        : 'bg-gray-100 text-gray-600'
+                                                                    }`}
+                                                            >
+                                                                {v.emoji}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
-                    <DrawerFooter className="px-4 pb-10">
-                        <Button
-                            onClick={handleSave}
-                            className="w-full bg-rose-500 h-12 text-lg rounded-2xl"
-                        >
-                            <Sparkles className="w-4 h-4 mr-2" />
-                            Plant Seed
-                        </Button>
+                    <DrawerFooter className="px-6 pb-8">
+                        <div className="flex gap-3">
+                            {step > 1 && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setStep(step - 1)}
+                                    className="flex-1 rounded-2xl"
+                                >
+                                    Back
+                                </Button>
+                            )}
+                            {step < 3 ? (
+                                <Button
+                                    onClick={goNext}
+                                    className="flex-1 bg-rose-500 rounded-2xl h-12"
+                                >
+                                    Next
+                                </Button>
+                            ) : (
+                                <Button
+                                    onClick={handleSave}
+                                    className="flex-1 bg-rose-500 rounded-2xl h-12"
+                                >
+                                    <Sparkles className="w-4 h-4 mr-2" />
+                                    Plant Seed
+                                </Button>
+                            )}
+                        </div>
                         <DrawerClose asChild>
-                            <Button variant="outline" className="w-full rounded-2xl">
+                            <Button variant="ghost" className="w-full text-gray-400">
                                 Cancel
                             </Button>
                         </DrawerClose>

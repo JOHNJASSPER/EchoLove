@@ -24,16 +24,16 @@ export default function GardenPage() {
 
             <div className="max-w-md mx-auto px-6 pt-12 relative z-10">
                 {/* Header */}
-                <header className="flex justify-between items-center mb-8">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-                            Echo<span className="gradient-text">Love</span>
-                        </h1>
-                        <p className="text-sm text-gray-500 font-medium tracking-wide">
-                            {username ? `${username}'s Garden` : 'Your Digital Garden'}
-                        </p>
+                <header className="text-center mb-8 relative">
+                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+                        Echo<span className="gradient-text">Love</span>
+                    </h1>
+                    <p className="text-sm text-gray-500 font-medium tracking-wide">
+                        {username ? `${username}'s Garden` : 'Your Digital Garden'}
+                    </p>
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2">
+                        <SettingsDrawer />
                     </div>
-                    <SettingsDrawer />
                 </header>
 
                 {/* Event Banner - Shows when there's a special day */}
