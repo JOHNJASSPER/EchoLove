@@ -3,6 +3,37 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
+// Simple in-memory rate limiter (Map<IP, {count, startTime}>)
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const MAX_REQUESTS = 10; // 10 requests per minute
+const rateLimitMap = new Map<string, { count: number; startTime: number }>();
+
+function isRateLimited(ip: string): boolean {
+    const now = Date.now();
+    const record = rateLimitMap.get(ip);
+
+    // Clean up old entries
+    if (rateLimitMap.size > 1000) rateLimitMap.clear();
+
+    if (!record) {
+        rateLimitMap.set(ip, { count: 1, startTime: now });
+        return false;
+    }
+
+    if (now - record.startTime > RATE_LIMIT_WINDOW) {
+        // Reset window
+        rateLimitMap.set(ip, { count: 1, startTime: now });
+        return false;
+    }
+
+    if (record.count >= MAX_REQUESTS) {
+        return true;
+    }
+
+    record.count++;
+    return false;
+}
+
 // Event-specific prompt templates
 const MESSAGE_TEMPLATES: Record<string, { systemExtra: string; examples: string[] }> = {
     birthday: {
@@ -44,17 +75,41 @@ const MESSAGE_TEMPLATES: Record<string, { systemExtra: string; examples: string[
 
 export async function POST(req: Request) {
     try {
+        // 1. Rate Limiting
+        const ip = req.headers.get('x-forwarded-for') || 'unknown';
+        if (isRateLimited(ip)) {
+            return NextResponse.json(
+                { error: 'Too many requests. Please try again later.' },
+                { status: 429 }
+            );
+        }
+
         const { contactName, relationship, vibe, holiday, messageType = 'checkin', recentMessages = [] } = await req.json();
 
-        // Basic sanitization
-        const safeName = contactName?.replace(/[<>]/g, '') || 'Friend';
+        // 2. Sanitization
+        // Remove characters that could be used for injection/formatting attacks
+        const safeName = (contactName || 'Friend').replace(/[<>"{}]/g, '').trim().substring(0, 50);
+        const safeRelationship = (relationship || 'Contact').replace(/[<>"{}]/g, '').trim().substring(0, 50);
+
+        // Ensure recent messages are strings and sanitized
+        const safeRecentMessages = (Array.isArray(recentMessages) ? recentMessages : [])
+            .filter(m => typeof m === 'string')
+            .map(m => m.replace(/[<>]/g, '').substring(0, 100)); // Truncate to avoid context overflow
+
         const template = MESSAGE_TEMPLATES[messageType] || MESSAGE_TEMPLATES.checkin;
 
+        // Secure Random Helper
+        const getSecureRandomInt = (max: number) => {
+            const array = new Uint32Array(1);
+            crypto.getRandomValues(array);
+            return array[0] % max;
+        };
+
         if (!process.env.GROQ_API_KEY) {
-            // Return a random example from the template
+            // Return a random example from the template using secure random
+            const randomIndex = getSecureRandomInt(template.examples.length);
             return NextResponse.json({
-                echo: template.examples[Math.floor(Math.random() * template.examples.length)]
-                    .replace(/you/gi, safeName)
+                echo: template.examples[randomIndex].replace(/you/gi, safeName)
             });
         }
 
@@ -62,10 +117,10 @@ export async function POST(req: Request) {
             apiKey: process.env.GROQ_API_KEY,
         });
 
-        // Build avoidance list from recent messages
-        const avoidanceClause = recentMessages.length > 0
+        // Build avoidance list from sanitized recent messages
+        const avoidanceClause = safeRecentMessages.length > 0
             ? `\n\nCRITICAL - DO NOT use any of these phrases or similar openings (these were recently sent):
-${recentMessages.map((m: string, i: number) => `${i + 1}. "${m.substring(0, 50)}..."`).join('\n')}
+${safeRecentMessages.map((m: string, i: number) => `${i + 1}. "${m}..."`).join('\n')}
 Generate something COMPLETELY FRESH and different. Use a unique opening.`
             : '';
 
@@ -91,7 +146,7 @@ ${holiday ? `- Today is ${holiday}. Incorporate this naturally.` : ''}${avoidanc
             messageType === 'love' ? 'romantic love' :
                 messageType === 'motivation' ? 'motivational' : 'check-in';
 
-        const userPrompt = `Write a ${vibe}, ${typeLabel} message to my ${relationship}, ${safeName}.${holiday ? ` Today is ${holiday}.` : ''}`;
+        const userPrompt = `Write a ${vibe}, ${typeLabel} message to my ${safeRelationship}, ${safeName}.${holiday ? ` Today is ${holiday}.` : ''}`;
 
         const response = await groq.chat.completions.create({
             model: 'llama-3.3-70b-versatile',
@@ -113,8 +168,14 @@ ${holiday ? `- Today is ${holiday}. Incorporate this naturally.` : ''}${avoidanc
             "Thinking of you! Hope your day is magical. ✨",
             "Hey! Just a reminder that you're awesome. 💖"
         ];
+
+        // Secure random fallback
+        const array = new Uint32Array(1);
+        crypto.getRandomValues(array);
+        const randomIndex = array[0] % FALLBACKS.length;
+
         return NextResponse.json(
-            { echo: FALLBACKS[Math.floor(Math.random() * FALLBACKS.length)] },
+            { echo: FALLBACKS[randomIndex] },
             { status: 200 }
         );
     }
