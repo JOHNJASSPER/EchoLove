@@ -52,32 +52,41 @@ export function PlantCard({ contact, onClick }: PlantCardProps) {
                     y: { duration: 4, repeat: Infinity, ease: "easeInOut" }
                 }}
                 className={cn(
-                    "relative w-full aspect-[4/5] rounded-3xl overflow-hidden border transition-all duration-500 cursor-pointer",
+                    "relative w-full aspect-[4/5] rounded-3xl overflow-hidden border-2 transition-all duration-500 cursor-pointer",
                     isWilting
-                        ? "opacity-70 border-gray-300 grayscale-[0.5] bg-gray-100 shadow-md"
-                        : "border-gray-200 shadow-xl shadow-gray-300/50 bg-white"
+                        ? "opacity-60 border-gray-300 grayscale bg-gray-100 shadow-md"
+                        : contact.vibe === 'sweet' ? "border-rose-200 shadow-2xl shadow-rose-200/60 bg-gradient-to-br from-rose-50 to-orange-50"
+                            : contact.vibe === 'chill' ? "border-teal-200 shadow-2xl shadow-teal-200/60 bg-gradient-to-br from-blue-50 to-emerald-50"
+                                : contact.vibe === 'deep' ? "border-violet-200 shadow-2xl shadow-violet-200/60 bg-gradient-to-br from-indigo-50 to-purple-50"
+                                    : "border-amber-200 shadow-2xl shadow-amber-200/60 bg-gradient-to-br from-yellow-50 to-pink-50"
                 )}
             >
-                {/* Background Gradient based on Vibe */}
+                {/* Background Gradient Overlay based on Vibe */}
                 <div className={cn(
-                    "absolute inset-0 opacity-40 bg-gradient-to-br",
-                    contact.vibe === 'sweet' ? "from-rose-300 to-orange-200" :
-                        contact.vibe === 'chill' ? "from-blue-200 to-emerald-100" :
-                            contact.vibe === 'deep' ? "from-indigo-300 to-purple-200" :
-                                "from-yellow-200 to-pink-200"
+                    "absolute inset-0 opacity-60 bg-gradient-to-br",
+                    contact.vibe === 'sweet' ? "from-rose-200/80 to-orange-100/60" :
+                        contact.vibe === 'chill' ? "from-cyan-200/80 to-emerald-100/60" :
+                            contact.vibe === 'deep' ? "from-indigo-200/80 to-purple-100/60" :
+                                "from-amber-200/80 to-pink-100/60"
                 )} />
 
                 {/* Content */}
                 <div className="absolute inset-0 p-5 flex flex-col justify-between items-start text-left">
-                    <div className="w-10 h-10 rounded-full bg-white/40 flex items-center justify-center text-gray-700 backdrop-blur-sm">
-                        <span className="text-lg font-bold">{contact.name.charAt(0)}</span>
+                    <div className={cn(
+                        "w-12 h-12 rounded-2xl flex items-center justify-center backdrop-blur-sm shadow-lg",
+                        contact.vibe === 'sweet' ? "bg-white/70 text-rose-600" :
+                            contact.vibe === 'chill' ? "bg-white/70 text-teal-600" :
+                                contact.vibe === 'deep' ? "bg-white/70 text-violet-600" :
+                                    "bg-white/70 text-amber-600"
+                    )}>
+                        <span className="text-xl font-bold">{contact.name.charAt(0)}</span>
                     </div>
 
                     <div>
-                        <h3 className="text-lg font-bold text-gray-800 leading-tight">
+                        <h3 className="text-xl font-bold text-gray-800 leading-tight">
                             {contact.name}
                         </h3>
-                        <p className="text-xs font-medium text-gray-500 uppercase tracking-widest mt-1">
+                        <p className="text-xs font-semibold text-gray-600 uppercase tracking-widest mt-1">
                             {contact.relationship}
                         </p>
                         {/* Always show watering status */}
