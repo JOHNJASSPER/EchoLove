@@ -4,9 +4,11 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Contact } from '@/lib/db';
 import { motion } from 'framer-motion';
 import { differenceInDays, parse, setYear } from 'date-fns';
-import { Cake, Sparkles } from 'lucide-react';
+import { Cake, Sparkles, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/lib/store';
+import { getUpcomingHolidays, Holiday } from '@/lib/holidays';
+import { toast } from 'sonner';
 
 import { CalendarDrawer } from './CalendarDrawer';
 
@@ -94,13 +96,8 @@ export function PulseTimeline() {
                         );
                     })}
                 </div>
-                            </motion.button>
-    );
-})}
-                </div >
             )}
 
-<CalendarDrawer />
         </div >
     );
 }
