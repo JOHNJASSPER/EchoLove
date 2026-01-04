@@ -255,39 +255,25 @@ export function EchoEngineDrawer() {
                 const permission = await Notification.requestPermission();
                 if (permission === "granted") {
                     // Store reminder in localStorage for persistence
-                    const reminders = JSON.parse(localStorage.getItem('echolove_reminders') || '[]');
-                    reminders.push({
+                    const newReminders = JSON.parse(localStorage.getItem('echolove_reminders') || '[]');
+                    const reminder = {
                         id: Date.now(),
                         contactId: activeContact.id,
                         contactName: activeContact.name,
                         time: reminderTime,
                         scheduledFor: scheduleTime.toISOString()
-                    });
-                    localStorage.setItem('echolove_reminders', JSON.stringify(reminders));
+                    };
+                    newReminders.push(reminder);
+                    localStorage.setItem('echolove_reminders', JSON.stringify(newReminders));
 
-                    // Calculate delay until notification
-                    const delay = scheduleTime.getTime() - now.getTime();
-
-                    // If within 24 hours, set a timeout (will work while tab is open)
-                    if (delay > 0 && delay < 86400000) {
-                        setTimeout(() => {
-                            // Play notification sound
-                            const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=notification-sound-7062.mp3');
-                            audio.volume = 0.5;
-                            audio.play().catch(e => console.log('Audio play failed', e));
-
-                            // Show system notification
-                            new Notification(`New message from ${activeContact.name}`, {
-                                body: `Hey! It's time to send some love to ${activeContact.name} 💖`,
-                                icon: '/icons/icon-192x192.png',
-                                badge: '/icons/icon-96x96.png',
-                                tag: `echolove-${activeContact.id}`,
-                                renotify: true,
-                                vibrate: [200, 100, 200],
-                                requireInteraction: true,
-                                silent: false // Try to trigger system sound too
-                            });
-                        }, delay);
+                    // Send updated list to worker
+                    if (window.timerWorker) {
+                        window.timerWorker.postMessage({ reminders: newReminders });
+                    } else {
+                        // Fallback creation if not yet exists (though useEffect should have handled it)
+                        const worker = new Worker('/timer-worker.js');
+                        worker.postMessage({ reminders: newReminders });
+                        window.timerWorker = worker;
                     }
 
                     toast.success(`Reminder set for ${reminderTime}! 🔔`);
@@ -295,240 +281,246 @@ export function EchoEngineDrawer() {
                 } else {
                     toast.error("Please allow notifications in your browser");
                 }
-            } catch {
-                toast.error("Failed to set reminder");
+
+                toast.success(`Reminder set for ${reminderTime}! 🔔`);
+                setShowReminder(false);
+            } else {
+                toast.error("Please allow notifications in your browser");
             }
+        } catch {
+            toast.error("Failed to set reminder");
         }
-    };
+    }
+};
 
-    if (!activeContact) return null;
+if (!activeContact) return null;
 
-    // Determine if this is a special event
-    const isBirthdayMode = eventContext === 'birthday';
-    const isHolidayMode = eventContext === 'holiday';
+// Determine if this is a special event
+const isBirthdayMode = eventContext === 'birthday';
+const isHolidayMode = eventContext === 'holiday';
 
-    return (
-        <Drawer open={isEngineOpen} onOpenChange={setEngineOpen}>
-            <DrawerContent key={drawerKey} className={`backdrop-blur-2xl h-[95vh] ${isBirthdayMode ? 'bg-gradient-to-b from-rose-50 to-white' : isHolidayMode ? 'bg-gradient-to-b from-pink-50 to-white' : 'bg-white/95'}`}>
-                <div className="mx-auto w-full max-w-sm flex flex-col h-full overflow-hidden">
-                    <DrawerHeader className="relative">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <DrawerTitle className="text-2xl font-bold text-left flex items-center gap-2">
-                                    {isBirthdayMode ? (
-                                        <>
-                                            <span className="text-2xl">🎂</span>
-                                            {activeContact.name}&apos;s Birthday!
-                                        </>
-                                    ) : isHolidayMode ? (
-                                        <>
-                                            <span className="text-2xl">💕</span>
-                                            {holidayName} Message
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Droplets className="w-5 h-5 text-blue-400" />
-                                            Watering {activeContact.name}
-                                        </>
-                                    )}
-                                </DrawerTitle>
-                                <div className="flex items-center gap-2 mt-1">
-                                    {isBirthdayMode && <span className="text-xs bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full font-medium">🎉 Birthday Mode</span>}
-                                    {isHolidayMode && <span className="text-xs bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full font-medium">💕 {holidayName}</span>}
-                                    {hasPhone && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">📱 SMS</span>}
-                                    {hasEmail && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">✉️ Email</span>}
-                                </div>
+return (
+    <Drawer open={isEngineOpen} onOpenChange={setEngineOpen}>
+        <DrawerContent key={drawerKey} className={`backdrop-blur-2xl h-[95vh] ${isBirthdayMode ? 'bg-gradient-to-b from-rose-50 to-white' : isHolidayMode ? 'bg-gradient-to-b from-pink-50 to-white' : 'bg-white/95'}`}>
+            <div className="mx-auto w-full max-w-sm flex flex-col h-full overflow-hidden">
+                <DrawerHeader className="relative">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <DrawerTitle className="text-2xl font-bold text-left flex items-center gap-2">
+                                {isBirthdayMode ? (
+                                    <>
+                                        <span className="text-2xl">🎂</span>
+                                        {activeContact.name}&apos;s Birthday!
+                                    </>
+                                ) : isHolidayMode ? (
+                                    <>
+                                        <span className="text-2xl">💕</span>
+                                        {holidayName} Message
+                                    </>
+                                ) : (
+                                    <>
+                                        <Droplets className="w-5 h-5 text-blue-400" />
+                                        Watering {activeContact.name}
+                                    </>
+                                )}
+                            </DrawerTitle>
+                            <div className="flex items-center gap-2 mt-1">
+                                {isBirthdayMode && <span className="text-xs bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full font-medium">🎉 Birthday Mode</span>}
+                                {isHolidayMode && <span className="text-xs bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full font-medium">💕 {holidayName}</span>}
+                                {hasPhone && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">📱 SMS</span>}
+                                {hasEmail && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">✉️ Email</span>}
                             </div>
-                            <div className="flex gap-1">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="rounded-full"
-                                    onClick={() => setShowReminder(!showReminder)}
-                                >
-                                    <Bell className="w-5 h-5 text-rose-500" />
+                        </div>
+                        <div className="flex gap-1">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-full"
+                                onClick={() => setShowReminder(!showReminder)}
+                            >
+                                <Bell className="w-5 h-5 text-rose-500" />
+                            </Button>
+                            <DrawerClose asChild>
+                                <Button variant="ghost" size="icon" className="rounded-full">
+                                    <X className="w-5 h-5" />
                                 </Button>
-                                <DrawerClose asChild>
-                                    <Button variant="ghost" size="icon" className="rounded-full">
-                                        <X className="w-5 h-5" />
-                                    </Button>
-                                </DrawerClose>
-                            </div>
-                        </div>
-                    </DrawerHeader>
-
-                    <div className="flex-1 px-6 space-y-4 overflow-y-auto pt-2">
-                        {/* Reminder Panel */}
-                        <AnimatePresence>
-                            {showReminder && (
-                                <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    className="glass-card p-4 space-y-3"
-                                >
-                                    <Label className="flex items-center gap-2 text-sm font-medium">
-                                        <Clock className="w-4 h-4" />
-                                        Set Daily Reminder
-                                    </Label>
-                                    <div className="flex gap-2">
-                                        <Input
-                                            type="time"
-                                            value={reminderTime}
-                                            onChange={(e) => setReminderTime(e.target.value)}
-                                            className="flex-1"
-                                        />
-                                        <Button onClick={handleSetReminder} size="sm" className="bg-rose-500">
-                                            <Bell className="w-4 h-4 mr-1" />
-                                            Set
-                                        </Button>
-                                    </div>
-                                    <p className="text-xs text-gray-500">
-                                        You&apos;ll get a notification to send a message at this time
-                                    </p>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-
-                        {/* Mode Toggle */}
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => setIsManual(false)}
-                                className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${!isManual ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600'
-                                    }`}
-                            >
-                                <Sparkles className="w-4 h-4 inline mr-1" /> AI Generate
-                            </button>
-                            <button
-                                onClick={() => { setIsManual(true); setDraft(''); }}
-                                className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${isManual ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600'
-                                    }`}
-                            >
-                                ✍️ Write Manually
-                            </button>
-                        </div>
-
-                        {/* Vibe Selection (AI mode only) */}
-                        {!isManual && (
-                            <div className="space-y-4">
-                                <VibeSlider value={vibe} onChange={setVibe} />
-                            </div>
-                        )}
-
-                        {/* Message Area */}
-                        <div className="space-y-3">
-                            {isManual ? (
-                                <Textarea
-                                    placeholder="Write your message..."
-                                    value={draft}
-                                    onChange={(e) => setDraft(e.target.value)}
-                                    className="min-h-[120px] text-lg"
-                                />
-                            ) : (
-                                <div className="relative min-h-[120px] flex flex-col items-center justify-center p-5 rounded-3xl border border-rose-100 bg-rose-50/30 overflow-hidden">
-                                    <AnimatePresence mode="wait">
-                                        {isGenerating ? (
-                                            <motion.div
-                                                key="generating"
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                exit={{ opacity: 0 }}
-                                                className="flex flex-col items-center space-y-3"
-                                            >
-                                                <RefreshCw className="w-7 h-7 text-rose-400 animate-spin" />
-                                                <p className="text-rose-500 font-medium text-sm">Brewing affection...</p>
-                                            </motion.div>
-                                        ) : draft ? (
-                                            <motion.div
-                                                key="draft"
-                                                initial={{ opacity: 0, scale: 0.95 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                className="space-y-3 text-center"
-                                            >
-                                                <p className="text-base leading-relaxed text-gray-800 font-medium italic">
-                                                    &ldquo;{draft}&rdquo;
-                                                </p>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={generateEcho}
-                                                    className="text-gray-400 hover:text-rose-500 transition-colors"
-                                                >
-                                                    <RefreshCw className="w-4 h-4 mr-1" />
-                                                    Regenerate
-                                                </Button>
-                                            </motion.div>
-                                        ) : (
-                                            <motion.div
-                                                key="empty"
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                className="flex flex-col items-center space-y-3"
-                                            >
-                                                <div className="w-10 h-10 bg-white rounded-full shadow-inner flex items-center justify-center">
-                                                    <Sparkles className="w-5 h-5 text-rose-300" />
-                                                </div>
-                                                <p className="text-gray-400 text-sm">Tap Generate to create a message</p>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </div>
-                            )}
+                            </DrawerClose>
                         </div>
                     </div>
+                </DrawerHeader>
 
-                    <DrawerFooter className="px-6 pb-8 space-y-3">
-                        {!draft && !isManual ? (
-                            <Button
-                                onClick={generateEcho}
-                                className="w-full bg-rose-500 h-14 text-lg rounded-2xl shadow-xl shadow-rose-500/20"
-                                disabled={isGenerating}
+                <div className="flex-1 px-6 space-y-4 overflow-y-auto pt-2">
+                    {/* Reminder Panel */}
+                    <AnimatePresence>
+                        {showReminder && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="glass-card p-4 space-y-3"
                             >
-                                <Sparkles className="w-5 h-5 mr-2" />
-                                Generate Spark ✨
-                            </Button>
-                        ) : draft ? (
-                            <div className="space-y-3">
-                                <p className="text-xs text-center text-gray-500 font-medium">Send via:</p>
-                                <div className={`grid gap-2 ${hasPhone && hasEmail ? 'grid-cols-3' : hasPhone ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                                    {hasPhone && (
-                                        <Button
-                                            onClick={handleSendSMS}
-                                            className="h-14 rounded-xl bg-green-500 hover:bg-green-600 flex-col"
-                                        >
-                                            <Phone className="w-5 h-5" />
-                                            <span className="text-xs mt-1">SMS</span>
-                                        </Button>
-                                    )}
-                                    {hasPhone && (
-                                        <Button
-                                            onClick={handleSendWhatsApp}
-                                            className="h-14 rounded-xl bg-emerald-500 hover:bg-emerald-600 flex-col"
-                                        >
-                                            <MessageSquare className="w-5 h-5" />
-                                            <span className="text-xs mt-1">WhatsApp</span>
-                                        </Button>
-                                    )}
-                                    {hasEmail && (
-                                        <Button
-                                            onClick={handleSendEmail}
-                                            className="h-14 rounded-xl bg-blue-500 hover:bg-blue-600 flex-col"
-                                        >
-                                            <Mail className="w-5 h-5" />
-                                            <span className="text-xs mt-1">Email</span>
-                                        </Button>
-                                    )}
+                                <Label className="flex items-center gap-2 text-sm font-medium">
+                                    <Clock className="w-4 h-4" />
+                                    Set Daily Reminder
+                                </Label>
+                                <div className="flex gap-2">
+                                    <Input
+                                        type="time"
+                                        value={reminderTime}
+                                        onChange={(e) => setReminderTime(e.target.value)}
+                                        className="flex-1"
+                                    />
+                                    <Button onClick={handleSetReminder} size="sm" className="bg-rose-500">
+                                        <Bell className="w-4 h-4 mr-1" />
+                                        Set
+                                    </Button>
                                 </div>
-                                {!hasAnyContact && (
-                                    <p className="text-center text-amber-600 text-sm">
-                                        Edit this contact to add phone or email
-                                    </p>
+                                <p className="text-xs text-gray-500">
+                                    You&apos;ll get a notification to send a message at this time
+                                </p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Mode Toggle */}
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setIsManual(false)}
+                            className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${!isManual ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600'
+                                }`}
+                        >
+                            <Sparkles className="w-4 h-4 inline mr-1" /> AI Generate
+                        </button>
+                        <button
+                            onClick={() => { setIsManual(true); setDraft(''); }}
+                            className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${isManual ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600'
+                                }`}
+                        >
+                            ✍️ Write Manually
+                        </button>
+                    </div>
+
+                    {/* Vibe Selection (AI mode only) */}
+                    {!isManual && (
+                        <div className="space-y-4">
+                            <VibeSlider value={vibe} onChange={setVibe} />
+                        </div>
+                    )}
+
+                    {/* Message Area */}
+                    <div className="space-y-3">
+                        {isManual ? (
+                            <Textarea
+                                placeholder="Write your message..."
+                                value={draft}
+                                onChange={(e) => setDraft(e.target.value)}
+                                className="min-h-[120px] text-lg"
+                            />
+                        ) : (
+                            <div className="relative min-h-[120px] flex flex-col items-center justify-center p-5 rounded-3xl border border-rose-100 bg-rose-50/30 overflow-hidden">
+                                <AnimatePresence mode="wait">
+                                    {isGenerating ? (
+                                        <motion.div
+                                            key="generating"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            className="flex flex-col items-center space-y-3"
+                                        >
+                                            <RefreshCw className="w-7 h-7 text-rose-400 animate-spin" />
+                                            <p className="text-rose-500 font-medium text-sm">Brewing affection...</p>
+                                        </motion.div>
+                                    ) : draft ? (
+                                        <motion.div
+                                            key="draft"
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            className="space-y-3 text-center"
+                                        >
+                                            <p className="text-base leading-relaxed text-gray-800 font-medium italic">
+                                                &ldquo;{draft}&rdquo;
+                                            </p>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={generateEcho}
+                                                className="text-gray-400 hover:text-rose-500 transition-colors"
+                                            >
+                                                <RefreshCw className="w-4 h-4 mr-1" />
+                                                Regenerate
+                                            </Button>
+                                        </motion.div>
+                                    ) : (
+                                        <motion.div
+                                            key="empty"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            className="flex flex-col items-center space-y-3"
+                                        >
+                                            <div className="w-10 h-10 bg-white rounded-full shadow-inner flex items-center justify-center">
+                                                <Sparkles className="w-5 h-5 text-rose-300" />
+                                            </div>
+                                            <p className="text-gray-400 text-sm">Tap Generate to create a message</p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <DrawerFooter className="px-6 pb-8 space-y-3">
+                    {!draft && !isManual ? (
+                        <Button
+                            onClick={generateEcho}
+                            className="w-full bg-rose-500 h-14 text-lg rounded-2xl shadow-xl shadow-rose-500/20"
+                            disabled={isGenerating}
+                        >
+                            <Sparkles className="w-5 h-5 mr-2" />
+                            Generate Spark ✨
+                        </Button>
+                    ) : draft ? (
+                        <div className="space-y-3">
+                            <p className="text-xs text-center text-gray-500 font-medium">Send via:</p>
+                            <div className={`grid gap-2 ${hasPhone && hasEmail ? 'grid-cols-3' : hasPhone ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                                {hasPhone && (
+                                    <Button
+                                        onClick={handleSendSMS}
+                                        className="h-14 rounded-xl bg-green-500 hover:bg-green-600 flex-col"
+                                    >
+                                        <Phone className="w-5 h-5" />
+                                        <span className="text-xs mt-1">SMS</span>
+                                    </Button>
+                                )}
+                                {hasPhone && (
+                                    <Button
+                                        onClick={handleSendWhatsApp}
+                                        className="h-14 rounded-xl bg-emerald-500 hover:bg-emerald-600 flex-col"
+                                    >
+                                        <MessageSquare className="w-5 h-5" />
+                                        <span className="text-xs mt-1">WhatsApp</span>
+                                    </Button>
+                                )}
+                                {hasEmail && (
+                                    <Button
+                                        onClick={handleSendEmail}
+                                        className="h-14 rounded-xl bg-blue-500 hover:bg-blue-600 flex-col"
+                                    >
+                                        <Mail className="w-5 h-5" />
+                                        <span className="text-xs mt-1">Email</span>
+                                    </Button>
                                 )}
                             </div>
-                        ) : null}
-                    </DrawerFooter>
-                </div>
-            </DrawerContent>
-        </Drawer>
-    );
+                            {!hasAnyContact && (
+                                <p className="text-center text-amber-600 text-sm">
+                                    Edit this contact to add phone or email
+                                </p>
+                            )}
+                        </div>
+                    ) : null}
+                </DrawerFooter>
+            </div>
+        </DrawerContent>
+    </Drawer>
+);
 }
