@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalAuth } from '@/lib/local-auth';
+import { useAppStore } from '@/lib/store';
 import { OrbitGrid } from '@/components/garden/OrbitGrid';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { AddContactDrawer } from '@/components/features/AddContactDrawer';
@@ -8,12 +9,14 @@ import { EchoEngineDrawer } from '@/components/features/EchoEngineDrawer';
 import { PulseTimeline } from '@/components/features/PulseTimeline';
 import { SettingsDrawer } from '@/components/features/SettingsDrawer';
 import { EventBanner } from '@/components/features/EventBanner';
-import { QuickActions } from '@/components/features/QuickActions';
 import { SeedFrame } from '@/components/features/SeedFrame';
-import { Plus, Sparkles, Leaf } from 'lucide-react';
+import { CalendarDrawer } from '@/components/features/CalendarDrawer';
+import { RemindersDrawer } from '@/components/features/RemindersDrawer';
+import { Plus, Sparkles, Leaf, Calendar } from 'lucide-react';
 
 export default function GardenPage() {
     const { username } = useLocalAuth();
+    const { setCalendarOpen } = useAppStore();
 
     return (
         <main className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-emerald-50 pb-32 relative overflow-hidden">
@@ -24,23 +27,29 @@ export default function GardenPage() {
 
             <div className="max-w-md mx-auto px-6 pt-12 relative z-10">
                 {/* Header */}
-                <header className="text-center mb-8 relative">
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-                        Echo<span className="gradient-text">Love</span>
-                    </h1>
-                    <p className="text-sm text-gray-500 font-medium tracking-wide">
-                        {username ? `${username}'s Garden` : 'Your Digital Garden'}
-                    </p>
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2">
+                <header className="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                            Echo<span className="gradient-text">Love</span>
+                        </h1>
+                        <p className="text-xs text-gray-500 font-medium tracking-wide">
+                            {username ? `${username}'s Garden` : 'Your Digital Garden'}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={() => setCalendarOpen(true)}
+                            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                        >
+                            <Calendar className="w-5 h-5 text-gray-600" />
+                        </button>
+                        <RemindersDrawer />
                         <SettingsDrawer />
                     </div>
                 </header>
 
                 {/* Event Banner - Shows when there's a special day */}
                 <EventBanner />
-
-                {/* Quick Actions */}
-                <QuickActions />
 
                 {/* The Pulse - Upcoming Events */}
                 <SeedFrame title="The Pulse" icon={<Sparkles className="w-4 h-4" />}>
@@ -69,6 +78,9 @@ export default function GardenPage() {
 
                 {/* The Engine (Hidden until triggered) */}
                 <EchoEngineDrawer />
+
+                {/* Calendar Drawer */}
+                <CalendarDrawer />
 
                 {/* Navigation */}
                 <BottomNav />
