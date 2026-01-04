@@ -53,8 +53,8 @@ export function EchoEngineDrawer() {
             } else {
                 throw new Error(data.error || 'Failed to generate');
             }
-        } catch (error) {
-            console.error(error);
+        } catch {
+            // Log generic error internally if needed
             toast.error("AI generation failed. Using fallback message.");
             setDraft(`Thinking of you, ${activeContact.name}! Hope your day is going great. 💕`);
         } finally {
@@ -63,19 +63,19 @@ export function EchoEngineDrawer() {
     };
 
     const logInteraction = async (type: 'sms' | 'whatsapp' | 'email') => {
-        if (!activeContact) return;
+        if (!activeContact?.id) return;
         try {
             await db.interactions.add({
-                contactId: activeContact.id!,
+                contactId: activeContact.id,
                 type,
                 note: draft.substring(0, 100),
                 date: new Date(),
             });
-            await db.contacts.update(activeContact.id!, {
+            await db.contacts.update(activeContact.id, {
                 lastContacted: new Date(),
             });
         } catch (error) {
-            console.error('Failed to log interaction:', error);
+            console.error('Interaction logging failed');
         }
     };
 

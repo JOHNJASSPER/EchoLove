@@ -21,9 +21,9 @@ export function PulseTimeline() {
 
     const today = new Date();
     const upcomingBirthdays: UpcomingBirthday[] = contacts
-        .filter((c) => c.birthday)
+        .filter((c): c is Contact & { birthday: string } => Boolean(c.birthday))
         .map((contact) => {
-            const bday = parse(contact.birthday!, 'yyyy-MM-dd', new Date());
+            const bday = parse(contact.birthday, 'yyyy-MM-dd', new Date());
             let nextBirthday = setYear(bday, today.getFullYear());
 
             if (nextBirthday < today) {

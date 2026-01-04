@@ -49,7 +49,8 @@ export async function POST(req: Request) {
         const echo = response.choices[0].message.content;
         return NextResponse.json({ echo });
     } catch (error: unknown) {
-        console.error('Groq Error:', error);
+        // Log generic error for production safety
+        console.error('Groq Generation Failed');
         return NextResponse.json(
             { echo: "Sending you love and good vibes today! 💕" },
             { status: 200 }

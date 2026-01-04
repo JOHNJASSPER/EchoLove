@@ -36,7 +36,8 @@ export function EditContactDrawer({ contact, open, onOpenChange }: EditContactDr
         }
 
         try {
-            await db.contacts.update(contact.id!, {
+            if (!contact.id) throw new Error("Contact ID missing");
+            await db.contacts.update(contact.id, {
                 name: name.trim(),
                 relationship,
                 vibe,
@@ -53,7 +54,8 @@ export function EditContactDrawer({ contact, open, onOpenChange }: EditContactDr
 
     const handleDelete = async () => {
         try {
-            await db.contacts.delete(contact.id!);
+            if (!contact.id) return;
+            await db.contacts.delete(contact.id);
             toast.success(`${contact.name} removed from your garden`);
             onOpenChange(false);
         } catch {

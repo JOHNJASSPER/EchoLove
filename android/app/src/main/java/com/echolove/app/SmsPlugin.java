@@ -22,7 +22,8 @@ public class SmsPlugin extends Plugin {
 
     @PluginMethod
     public void send(PluginCall call) {
-        if (!getPermissionState("sms").equals(com.getcapacitor.PermissionState.GRANTED)) {
+        String permissionState = getPermissionState("sms");
+        if (permissionState == null || !permissionState.equals(com.getcapacitor.PermissionState.GRANTED)) {
             requestPermissionForAlias("sms", call, "permissionCallback");
             return;
         }
@@ -46,7 +47,8 @@ public class SmsPlugin extends Plugin {
 
     @PermissionCallback
     private void permissionCallback(PluginCall call) {
-        if (getPermissionState("sms").equals(com.getcapacitor.PermissionState.GRANTED)) {
+        String permissionState = getPermissionState("sms");
+        if (permissionState != null && permissionState.equals(com.getcapacitor.PermissionState.GRANTED)) {
             send(call);
         } else {
             call.reject("Permission denied");
