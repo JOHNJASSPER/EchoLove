@@ -9,16 +9,60 @@ import { cn } from '@/lib/utils';
 import { useAppStore } from '@/lib/store';
 import { getUpcomingHolidays, Holiday } from '@/lib/holidays';
 import { toast } from 'sonner';
-
 import { CalendarDrawer } from './CalendarDrawer';
 
-// ... existing imports
+type PulseItem =
+    | { type: 'birthday'; contact: Contact; daysUntil: number; id: string }
+    | { type: 'holiday'; holiday: Holiday; daysUntil: number; id: string };
 
 export function PulseTimeline() {
     const contacts = useLiveQuery(() => db.contacts.toArray());
     const { setActiveContact, setEngineOpen, setCalendarOpen } = useAppStore();
 
-    // ... existing logic ...
+    if (!contacts) return null;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // 1. Calculate Birthdays
+    const upcomingBirthdays: PulseItem[] = contacts
+        .filter((c): c is Contact & { birthday: string } => Boolean(c.birthday))
+        .map((contact) => {
+            const bday = parse(contact.birthday, 'yyyy-MM-dd', new Date());
+            let nextBirthday = setYear(bday, today.getFullYear());
+            if (nextBirthday < today) {
+                nextBirthday = setYear(bday, today.getFullYear() + 1);
+            }
+            const daysUntil = differenceInDays(nextBirthday, today);
+            return { type: 'birthday' as const, contact, daysUntil, id: `bday-${contact.id}` };
+        })
+        .filter((b) => b.daysUntil <= 30);
+
+    // 2. Calculate Holidays
+    const holidays = getUpcomingHolidays(60);
+    const upcomingHolidays: PulseItem[] = holidays.map(h => {
+        const hDate = new Date(h.date);
+        hDate.setHours(0, 0, 0, 0);
+        const daysUntil = differenceInDays(hDate, today);
+        return { type: 'holiday' as const, holiday: h, daysUntil, id: h.id };
+    });
+
+    // 3. Merge & Sort
+    const pulseItems = [...upcomingBirthdays, ...upcomingHolidays]
+        .sort((a, b) => a.daysUntil - b.daysUntil);
+
+    const handleBirthdayClick = (contact: Contact) => {
+        setActiveContact(contact);
+        setEngineOpen(true);
+    };
+
+    const handleHolidayClick = (holiday: Holiday) => {
+        toast.success(`It's almost ${holiday.name}! Tap a contact to send some love. 💖`);
+        const gardenGrid = document.getElementById('garden-grid');
+        if (gardenGrid) {
+            gardenGrid.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
 
     return (
         <div className="mb-6">
@@ -98,6 +142,7 @@ export function PulseTimeline() {
                 </div>
             )}
 
-        </div >
+            <CalendarDrawer />
+        </div>
     );
 }
