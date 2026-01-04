@@ -1,47 +1,18 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth-context';
+import { useLocalAuth } from '@/lib/local-auth';
 import { OrbitGrid } from '@/components/garden/OrbitGrid';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { AddContactDrawer } from '@/components/features/AddContactDrawer';
 import { EchoEngineDrawer } from '@/components/features/EchoEngineDrawer';
 import { PulseTimeline } from '@/components/features/PulseTimeline';
 import { SettingsDrawer } from '@/components/features/SettingsDrawer';
-import { Plus, Heart } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Plus } from 'lucide-react';
 
 export default function GardenPage() {
-    const { user, loading } = useAuth();
-    const router = useRouter();
+    const { username } = useLocalAuth();
+    // Auth checks are handled by AuthGuard now
 
-    useEffect(() => {
-        if (!loading && !user) {
-            router.push('/login');
-        }
-    }, [user, loading, router]);
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-emerald-50 flex items-center justify-center">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="text-center"
-                >
-                    <div className="w-16 h-16 bg-gradient-to-br from-rose-500 to-pink-500 rounded-2xl animate-pulse flex items-center justify-center mx-auto mb-4">
-                        <Heart className="w-8 h-8 text-white" fill="white" />
-                    </div>
-                    <p className="text-gray-500">Loading your garden...</p>
-                </motion.div>
-            </div>
-        );
-    }
-
-    if (!user) {
-        return null; // Will redirect
-    }
 
     return (
         <main className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-emerald-50 pb-32 relative overflow-hidden">
@@ -57,7 +28,7 @@ export default function GardenPage() {
                             Echo<span className="gradient-text">Love</span>
                         </h1>
                         <p className="text-sm text-gray-500 font-medium tracking-wide">
-                            {user.isAnonymous ? 'Guest Garden' : 'Your Digital Garden'}
+                            {username ? `'s Garden` : 'Your Digital Garden'}
                         </p>
                     </div>
                     <SettingsDrawer />

@@ -2,30 +2,21 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth-context';
+import { useLocalAuth } from '@/lib/local-auth';
 import { motion } from 'framer-motion';
 import { Heart, Sparkles, MessageSquare, Bell, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export default function HomePage() {
-  const { user, loading } = useAuth();
+  const { isAuthenticated } = useLocalAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && user) {
+    if (isAuthenticated) {
       router.push('/garden');
     }
-  }, [user, loading, router]);
+  }, [isAuthenticated, router]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-emerald-50 flex items-center justify-center">
-        <div className="w-16 h-16 bg-gradient-to-br from-rose-500 to-pink-500 rounded-2xl animate-pulse flex items-center justify-center">
-          <Heart className="w-8 h-8 text-white" fill="white" />
-        </div>
-      </div>
-    );
-  }
 
   // Landing page for non-authenticated users
   return (

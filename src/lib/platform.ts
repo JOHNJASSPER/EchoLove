@@ -1,4 +1,10 @@
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
+
+export interface SmsManagerPlugin {
+    send(options: { phoneNumber: string; message: string }): Promise<void>;
+}
+
+const SmsManager = registerPlugin<SmsManagerPlugin>('SmsManager');
 
 export const isNative = Capacitor.isNativePlatform();
 
@@ -12,10 +18,14 @@ export async function sendSMS(phoneNumber: string, message: string) {
     const cleanPhone = phoneNumber.replace(/\s/g, '');
 
     if (isNative) {
-        // In the future, we can hook into a native plugin here for background sending
-        // For now, we use the intent which is safer and doesn't require dangerous permissions immediately
-        // allowing the user to just hit "send" in their default app.
-        window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
+        try {
+            await SmsManager.send({ phoneNumber: cleanPhone, message });
+        } catch (e) {
+            console.error('Failed to send native SMS', e);
+            // Fallback
+            window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
+            throw e;
+        }
     } else {
         // Web fallback
         window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
