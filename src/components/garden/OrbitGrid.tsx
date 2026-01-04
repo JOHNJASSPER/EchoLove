@@ -14,7 +14,6 @@ export function OrbitGrid() {
     const setEngineOpen = useAppStore((state) => state.setEngineOpen);
     const setEventContext = useAppStore((state) => state.setEventContext);
 
-    // Show skeleton while loading
     if (contacts === undefined) {
         return <SkeletonGrid />;
     }

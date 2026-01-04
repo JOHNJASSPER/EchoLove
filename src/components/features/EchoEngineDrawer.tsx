@@ -284,7 +284,7 @@ export function EchoEngineDrawer() {
                         notifications: [{
                             title,
                             body,
-                            id: Math.floor(Math.random() * 1000000),
+                            id: Date.now() & 0x7FFFFFFF,
                             schedule: { at: scheduleTime },
                             sound: "echolove_chime.wav",
                             actionTypeId: "",

@@ -88,9 +88,9 @@ export function AddContactDrawer({ children }: { children?: React.ReactNode }) {
                     </Button>
                 )}
             </DrawerTrigger>
-            <DrawerContent className="bg-white backdrop-blur-xl min-h-[55vh]">
-                <div className="mx-auto w-full max-w-sm">
-                    <DrawerHeader className="py-3">
+            <DrawerContent className="bg-white backdrop-blur-xl h-[85vh] flex flex-col">
+                <div className="mx-auto w-full max-w-sm flex-1 flex flex-col overflow-y-auto">
+                    <DrawerHeader className="py-3 flex-none">
                         <DrawerTitle className="text-lg font-bold text-center">
                             <Sparkles className="w-4 h-4 text-rose-500 inline mr-1" />
                             Plant a Seed
@@ -102,74 +102,78 @@ export function AddContactDrawer({ children }: { children?: React.ReactNode }) {
                         </div>
                     </DrawerHeader>
 
-                    <div className="px-4 py-2">
+                    <div className="px-4 py-2 flex-1 overflow-y-auto">
                         <AnimatePresence mode="wait">
                             {step === 1 && (
-                                <motion.div key="s1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-2">
+                                <motion.div key="s1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
                                     <Label className="text-sm text-gray-600 block text-center">Who do you want to stay connected with?</Label>
-                                    <Input value={name} onChange={(e) => setName(e.target.value)} className="bg-white text-base py-4 text-center" placeholder="Mom, Sarah, Bestie..." autoFocus />
+                                    <Input value={name} onChange={(e) => setName(e.target.value)} className="bg-white text-base py-6 text-center shadow-sm" placeholder="Mom, Sarah, Bestie..." autoFocus />
+                                    {/* Added spacer for keyboard */}
+                                    <div className="h-20" />
                                 </motion.div>
                             )}
 
                             {step === 2 && (
-                                <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-2">
+                                <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
                                     <Label className="text-sm text-gray-600 block text-center">How do you know {name}?</Label>
-                                    <div className="grid grid-cols-3 gap-2">
+                                    <div className="grid grid-cols-3 gap-3">
                                         {RELATIONSHIPS.map((rel) => (
-                                            <button key={rel.value} onClick={() => setRelationship(rel.value)} className={`p-2 rounded-xl border-2 text-center transition-all ${relationship === rel.value ? 'border-rose-500 bg-rose-50' : 'border-gray-100 bg-white'}`}>
-                                                <span className="text-lg">{rel.emoji}</span>
-                                                <p className="text-[10px] font-medium mt-0.5">{rel.label}</p>
+                                            <button key={rel.value} onClick={() => setRelationship(rel.value)} className={`p-3 rounded-xl border-2 text-center transition-all ${relationship === rel.value ? 'border-rose-500 bg-rose-50' : 'border-gray-100 bg-white'}`}>
+                                                <span className="text-2xl block mb-1">{rel.emoji}</span>
+                                                <p className="text-xs font-medium">{rel.label}</p>
                                             </button>
                                         ))}
                                     </div>
+                                    <div className="h-20" />
                                 </motion.div>
                             )}
 
                             {step === 3 && (
-                                <motion.div key="s3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-2">
+                                <motion.div key="s3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
                                     <Label className="text-sm text-gray-600 block text-center">How do you reach {name}?</Label>
-                                    <Input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="bg-white py-3" placeholder="📱 Phone number" />
-                                    <div className="text-center text-gray-400 text-[10px]">or</div>
-                                    <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white py-3" placeholder="✉️ Email address" />
+                                    <Input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="bg-white py-4" placeholder="📱 Phone number" />
+                                    <div className="text-center text-gray-400 text-xs">or</div>
+                                    <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white py-4" placeholder="✉️ Email address" />
 
-                                    <button onClick={() => setShowOptional(!showOptional)} className="flex items-center gap-1 text-[11px] text-gray-400 mx-auto pt-1">
+                                    <button onClick={() => setShowOptional(!showOptional)} className="flex items-center gap-1 text-xs text-gray-400 mx-auto pt-2">
                                         More options {showOptional ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                                     </button>
 
                                     {showOptional && (
-                                        <div className="space-y-2 pt-1">
+                                        <div className="space-y-3 pt-2">
                                             <div>
-                                                <Label className="text-[10px] text-gray-400">Birthday</Label>
-                                                <Input type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} className="bg-white py-2 text-sm" />
+                                                <Label className="text-xs text-gray-400">Birthday</Label>
+                                                <Input type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} className="bg-white" />
                                             </div>
                                             <div>
-                                                <Label className="text-[10px] text-gray-400">Default Vibe</Label>
-                                                <div className="flex gap-1">
+                                                <Label className="text-xs text-gray-400">Default Vibe</Label>
+                                                <div className="flex gap-1.5 mt-1">
                                                     {VIBES.map((v) => (
-                                                        <button key={v} onClick={() => setVibe(v.toLowerCase())} className={`flex-1 py-1.5 rounded-lg text-[10px] font-medium ${vibe === v.toLowerCase() ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600'}`}>{v}</button>
+                                                        <button key={v} onClick={() => setVibe(v.toLowerCase())} className={`flex-1 py-2 rounded-lg text-xs font-medium transition-colors ${vibe === v.toLowerCase() ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600'}`}>{v}</button>
                                                     ))}
                                                 </div>
                                             </div>
                                         </div>
                                     )}
+                                    <div className="h-24" />
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </div>
 
-                    <DrawerFooter className="px-4 pt-2 pb-4">
-                        <div className="flex gap-2">
-                            {step > 1 && <Button variant="outline" onClick={() => setStep(step - 1)} className="flex-1 rounded-xl h-10">Back</Button>}
+                    <DrawerFooter className="px-4 py-4 bg-white/50 backdrop-blur-md border-t border-gray-100 flex-none">
+                        <div className="flex gap-3">
+                            {step > 1 && <Button variant="outline" onClick={() => setStep(step - 1)} className="flex-1 rounded-xl h-12">Back</Button>}
                             {step < 3 ? (
-                                <Button onClick={goNext} className="flex-1 bg-rose-500 rounded-xl h-10">Next</Button>
+                                <Button onClick={goNext} className="flex-1 bg-rose-500 hover:bg-rose-600 rounded-xl h-12 text-white">Next</Button>
                             ) : (
-                                <Button onClick={handleSave} className="flex-1 bg-rose-500 rounded-xl h-10">
-                                    <Sparkles className="w-3 h-3 mr-1" /> Plant Seed
+                                <Button onClick={handleSave} className="flex-1 bg-rose-500 hover:bg-rose-600 rounded-xl h-12 text-white">
+                                    <Sparkles className="w-4 h-4 mr-2" /> Plant Seed
                                 </Button>
                             )}
                         </div>
                         <DrawerClose asChild>
-                            <Button variant="ghost" className="w-full text-gray-400 text-xs h-8">Cancel</Button>
+                            <Button variant="ghost" className="w-full text-gray-400 text-xs h-8 mt-2">Cancel</Button>
                         </DrawerClose>
                     </DrawerFooter>
                 </div>

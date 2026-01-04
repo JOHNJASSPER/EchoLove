@@ -40,17 +40,21 @@ export default function LoginPage() {
         e.preventDefault();
         setIsLoading(true);
 
+        // Variable delay related to network, not user existence (simulated)
+        const delay = 500 + Math.random() * 200;
+
         setTimeout(() => {
             const success = login(pin);
             if (success) {
                 toast.success("Welcome back! 🌿");
                 router.push('/garden');
             } else {
-                toast.error("Incorrect PIN");
+                // Generic error for all failures
+                toast.error("Invalid credentials");
                 setPin('');
             }
             setIsLoading(false);
-        }, 500);
+        }, delay);
     };
 
     return (
