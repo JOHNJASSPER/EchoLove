@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EchoLove 🌸
+
+**Your Digital Garden for Nurturing Relationships**
+
+A privacy-first, local-first Progressive Web App (PWA) that helps you maintain meaningful connections with your loved ones through AI-powered message drafting.
+
+## Features
+
+- **The Garden**: Visual dashboard showing your "Inner Circle" as floating cards
+- **The Echo Engine**: AI-powered message generation with customizable "Vibes"
+- **Local-First**: All data stored in your browser (IndexedDB) - zero server storage
+- **PWA**: Installable to your home screen for native app experience
+
+## Tech Stack
+
+- **Frontend**: Next.js 16 + TypeScript
+- **Styling**: Tailwind CSS + Framer Motion
+- **Database**: Dexie.js (IndexedDB)
+- **AI**: OpenAI API (optional)
+- **State**: Zustand
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+cd pwa
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### For AI Features (FREE!)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+We use **Groq** - a free AI API with no credit card required.
 
-## Learn More
+1. Go to [console.groq.com](https://console.groq.com) and sign up (free)
+2. Create an API key
+3. Create `.env.local` in the `pwa` folder:
 
-To learn more about Next.js, take a look at the following resources:
+```
+GROQ_API_KEY=your_groq_key_here
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Restart the dev server
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Installing as PWA
 
-## Deploy on Vercel
+1. Open the app in Chrome/Safari on your phone
+2. Tap "Add to Home Screen"
+3. Launch from your home screen for the full experience
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Privacy
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Your relationship data never leaves your device. EchoLove stores everything locally in IndexedDB 🛡️
