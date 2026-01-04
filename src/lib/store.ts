@@ -8,6 +8,8 @@ interface AppState {
     setEngineOpen: (open: boolean) => void;
     isSettingsOpen: boolean;
     setSettingsOpen: (open: boolean) => void;
+    isCalendarOpen: boolean;
+    setCalendarOpen: (open: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -17,4 +19,6 @@ export const useAppStore = create<AppState>((set) => ({
     setEngineOpen: (open) => set({ isEngineOpen: open }),
     isSettingsOpen: false,
     setSettingsOpen: (open) => set({ isSettingsOpen: open }),
+    isCalendarOpen: false,
+    setCalendarOpen: (open) => set({ isCalendarOpen: open }),
 }));

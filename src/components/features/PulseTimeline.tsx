@@ -8,71 +8,31 @@ import { Cake, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/lib/store';
 
-import { getUpcomingHolidays, Holiday } from '@/lib/holidays';
-import { Calendar } from 'lucide-react';
-import { toast } from 'sonner';
+import { CalendarDrawer } from './CalendarDrawer';
 
-type PulseItem =
-    | { type: 'birthday'; contact: Contact; daysUntil: number; id: string }
-    | { type: 'holiday'; holiday: Holiday; daysUntil: number; id: string };
+// ... existing imports
 
 export function PulseTimeline() {
     const contacts = useLiveQuery(() => db.contacts.toArray());
-    const { setActiveContact, setEngineOpen } = useAppStore();
+    const { setActiveContact, setEngineOpen, setCalendarOpen } = useAppStore();
 
-    if (!contacts) return null;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // 1. Calculate Birthdays
-    const upcomingBirthdays: PulseItem[] = contacts
-        .filter((c): c is Contact & { birthday: string } => Boolean(c.birthday))
-        .map((contact) => {
-            const bday = parse(contact.birthday, 'yyyy-MM-dd', new Date());
-            let nextBirthday = setYear(bday, today.getFullYear());
-            if (nextBirthday < today) {
-                nextBirthday = setYear(bday, today.getFullYear() + 1);
-            }
-            const daysUntil = differenceInDays(nextBirthday, today);
-            return { type: 'birthday' as const, contact, daysUntil, id: `bday-${contact.id}` };
-        })
-        .filter((b) => b.daysUntil <= 30);
-
-    // 2. Calculate Holidays
-    const holidays = getUpcomingHolidays(60);
-    const upcomingHolidays: PulseItem[] = holidays.map(h => {
-        const hDate = new Date(h.date);
-        hDate.setHours(0, 0, 0, 0);
-        const daysUntil = differenceInDays(hDate, today);
-        return { type: 'holiday' as const, holiday: h, daysUntil, id: h.id };
-    });
-
-    // 3. Merge & Sort
-    const pulseItems = [...upcomingBirthdays, ...upcomingHolidays]
-        .sort((a, b) => a.daysUntil - b.daysUntil);
-
-    const handleBirthdayClick = (contact: Contact) => {
-        setActiveContact(contact);
-        setEngineOpen(true);
-    };
-
-    const handleHolidayClick = (holiday: Holiday) => {
-        toast.success(`It's almost ${holiday.name}! Tap a contact to send some love. 💖`);
-        // We could also scroll to grid or highlight contacts
-        const gardenGrid = document.getElementById('garden-grid');
-        if (gardenGrid) {
-            gardenGrid.scrollIntoView({ behavior: 'smooth' });
-        }
-    };
+    // ... existing logic ...
 
     return (
         <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-4 h-4 text-rose-500" />
-                <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
-                    The Pulse
-                </h2>
+            <div className="flex items-center justify-between mb-3 px-1">
+                <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-rose-500" />
+                    <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                        The Pulse
+                    </h2>
+                </div>
+                <button
+                    onClick={() => setCalendarOpen(true)}
+                    className="text-xs font-medium text-rose-500 hover:text-rose-600 flex items-center gap-1 bg-rose-50 px-2 py-1 rounded-lg transition-colors"
+                >
+                    View All <Calendar className="w-3 h-3" />
+                </button>
             </div>
 
             {pulseItems.length === 0 ? (
@@ -134,7 +94,13 @@ export function PulseTimeline() {
                         );
                     })}
                 </div>
+                            </motion.button>
+    );
+})}
+                </div >
             )}
-        </div>
+
+<CalendarDrawer />
+        </div >
     );
 }
