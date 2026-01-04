@@ -292,21 +292,40 @@ export function EchoEngineDrawer() {
 
     if (!activeContact) return null;
 
+    // Determine if this is a special event
+    const isBirthdayMode = eventContext === 'birthday';
+    const isHolidayMode = eventContext === 'holiday';
+
     return (
         <Drawer open={isEngineOpen} onOpenChange={setEngineOpen}>
-            <DrawerContent key={drawerKey} className="bg-white/95 backdrop-blur-2xl h-[95vh]">
+            <DrawerContent key={drawerKey} className={`backdrop-blur-2xl h-[95vh] ${isBirthdayMode ? 'bg-gradient-to-b from-rose-50 to-white' : isHolidayMode ? 'bg-gradient-to-b from-pink-50 to-white' : 'bg-white/95'}`}>
                 <div className="mx-auto w-full max-w-sm flex flex-col h-full overflow-hidden">
                     <DrawerHeader className="relative">
                         <div className="flex items-center justify-between">
                             <div>
                                 <DrawerTitle className="text-2xl font-bold text-left flex items-center gap-2">
-                                    <Droplets className="w-5 h-5 text-blue-400" />
-                                    Watering {activeContact.name}
+                                    {isBirthdayMode ? (
+                                        <>
+                                            <span className="text-2xl">🎂</span>
+                                            {activeContact.name}&apos;s Birthday!
+                                        </>
+                                    ) : isHolidayMode ? (
+                                        <>
+                                            <span className="text-2xl">💕</span>
+                                            {holidayName} Message
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Droplets className="w-5 h-5 text-blue-400" />
+                                            Watering {activeContact.name}
+                                        </>
+                                    )}
                                 </DrawerTitle>
                                 <div className="flex items-center gap-2 mt-1">
+                                    {isBirthdayMode && <span className="text-xs bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full font-medium">🎉 Birthday Mode</span>}
+                                    {isHolidayMode && <span className="text-xs bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full font-medium">💕 {holidayName}</span>}
                                     {hasPhone && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">📱 SMS</span>}
                                     {hasEmail && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">✉️ Email</span>}
-                                    <span className="text-[10px] text-gray-300">v1.1</span>
                                 </div>
                             </div>
                             <div className="flex gap-1">
@@ -381,14 +400,6 @@ export function EchoEngineDrawer() {
                         {/* Vibe Selection (AI mode only) */}
                         {!isManual && (
                             <div className="space-y-4">
-                                {/* Show context badge if event is set */}
-                                {eventContext && (
-                                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                                        <span className="px-2 py-1 bg-rose-100 text-rose-600 rounded-full text-xs font-medium">
-                                            {eventContext === 'birthday' ? '🎂 Birthday Message' : eventContext === 'holiday' ? `💕 ${holidayName || 'Holiday'} Message` : '💪 Motivation'}
-                                        </span>
-                                    </div>
-                                )}
                                 <VibeSlider value={vibe} onChange={setVibe} />
                             </div>
                         )}
