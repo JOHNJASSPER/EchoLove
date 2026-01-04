@@ -271,10 +271,21 @@ export function EchoEngineDrawer() {
                     // If within 24 hours, set a timeout (will work while tab is open)
                     if (delay > 0 && delay < 86400000) {
                         setTimeout(() => {
-                            new Notification(title, {
-                                body,
+                            // Play notification sound
+                            const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=notification-sound-7062.mp3');
+                            audio.volume = 0.5;
+                            audio.play().catch(e => console.log('Audio play failed', e));
+
+                            // Show system notification
+                            new Notification(`New message from ${activeContact.name}`, {
+                                body: `Hey! It's time to send some love to ${activeContact.name} 💖`,
                                 icon: '/icons/icon-192x192.png',
-                                tag: `echolove-${activeContact.id}`
+                                badge: '/icons/icon-96x96.png',
+                                tag: `echolove-${activeContact.id}`,
+                                renotify: true,
+                                vibrate: [200, 100, 200],
+                                requireInteraction: true,
+                                silent: false // Try to trigger system sound too
                             });
                         }, delay);
                     }
