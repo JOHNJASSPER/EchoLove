@@ -7,12 +7,13 @@ import { AddContactDrawer } from '@/components/features/AddContactDrawer';
 import { EchoEngineDrawer } from '@/components/features/EchoEngineDrawer';
 import { PulseTimeline } from '@/components/features/PulseTimeline';
 import { SettingsDrawer } from '@/components/features/SettingsDrawer';
-import { Plus } from 'lucide-react';
+import { EventBanner } from '@/components/features/EventBanner';
+import { QuickActions } from '@/components/features/QuickActions';
+import { SeedFrame } from '@/components/features/SeedFrame';
+import { Plus, Sparkles, Leaf } from 'lucide-react';
 
 export default function GardenPage() {
     const { username } = useLocalAuth();
-    // Auth checks are handled by AuthGuard now
-
 
     return (
         <main className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-emerald-50 pb-32 relative overflow-hidden">
@@ -22,6 +23,7 @@ export default function GardenPage() {
             <div className="absolute bottom-[10%] right-[-10%] w-[300px] h-[300px] bg-violet-100/30 rounded-full blur-[80px] pointer-events-none" />
 
             <div className="max-w-md mx-auto px-6 pt-12 relative z-10">
+                {/* Header */}
                 <header className="flex justify-between items-center mb-8">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
@@ -34,11 +36,23 @@ export default function GardenPage() {
                     <SettingsDrawer />
                 </header>
 
+                {/* Event Banner - Shows when there's a special day */}
+                <EventBanner />
+
+                {/* Quick Actions */}
+                <QuickActions />
+
                 {/* The Pulse - Upcoming Events */}
-                <PulseTimeline />
+                <SeedFrame title="The Pulse" icon={<Sparkles className="w-4 h-4" />}>
+                    <PulseTimeline />
+                </SeedFrame>
 
                 {/* The Garden */}
-                <OrbitGrid />
+                <SeedFrame title="Your Garden" icon={<Leaf className="w-4 h-4" />} subtitle="Tap a seed to water it">
+                    <div id="garden-grid">
+                        <OrbitGrid />
+                    </div>
+                </SeedFrame>
 
                 {/* Floating Action Button (FAB) */}
                 <div className="fixed bottom-28 right-6 z-40">

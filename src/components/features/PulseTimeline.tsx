@@ -65,22 +65,7 @@ export function PulseTimeline() {
     };
 
     return (
-        <div className="mb-6">
-            <div className="flex items-center justify-between mb-3 px-1">
-                <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-rose-500" />
-                    <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
-                        The Pulse
-                    </h2>
-                </div>
-                <button
-                    onClick={() => setCalendarOpen(true)}
-                    className="text-xs font-medium text-rose-500 hover:text-rose-600 flex items-center gap-1 bg-rose-50 px-2 py-1 rounded-lg transition-colors"
-                >
-                    View All <Calendar className="w-3 h-3" />
-                </button>
-            </div>
-
+        <div>
             {pulseItems.length === 0 ? (
                 <div className="glass-card p-4 text-center">
                     <p className="text-sm text-gray-500 italic">

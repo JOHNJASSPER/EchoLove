@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
 import { sendSMS } from '@/lib/platform';
 import { LocalNotifications } from '@capacitor/local-notifications';
+import { Capacitor } from '@capacitor/core';
 import { getUpcomingHolidays } from '@/lib/holidays';
 
 export function EchoEngineDrawer() {
@@ -35,7 +36,7 @@ export function EchoEngineDrawer() {
     const hasAnyContact = hasPhone || hasEmail;
 
     const generateEcho = async () => {
-        if (!activeContact) return;
+        if (!activeContact || !activeContact.id) return;
         setIsGenerating(true);
         setIsManual(false);
 
@@ -43,8 +44,21 @@ export function EchoEngineDrawer() {
         const todaysHolidays = getUpcomingHolidays(0);
         const activeHoliday = todaysHolidays.length > 0 ? todaysHolidays[0].name : null;
 
+        // Fetch recent messages for this contact to avoid repetition
+        let recentMessages: string[] = [];
         try {
-            // Add timestamp to prevent aggressive mobile caching
+            const recent = await db.generatedMessages
+                .where('contactId')
+                .equals(activeContact.id)
+                .reverse()
+                .limit(5)
+                .toArray();
+            recentMessages = recent.map(m => m.content);
+        } catch {
+            // Ignore if table doesn't exist yet
+        }
+
+        try {
             const response = await fetch(`/api/echo?ts=${Date.now()}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -53,18 +67,31 @@ export function EchoEngineDrawer() {
                     contactName: activeContact.name,
                     relationship: activeContact.relationship,
                     vibe: vibe,
-                    holiday: activeHoliday // Pass the holiday context
+                    holiday: activeHoliday,
+                    recentMessages // Pass history for freshness
                 }),
             });
 
             const data = await response.json();
             if (data.echo) {
                 setDraft(data.echo);
+
+                // Save generated message for future freshness
+                try {
+                    await db.generatedMessages.add({
+                        contactId: activeContact.id,
+                        content: data.echo,
+                        vibe: vibe,
+                        holiday: activeHoliday || undefined,
+                        createdAt: new Date()
+                    });
+                } catch {
+                    // Ignore save errors
+                }
             } else {
                 throw new Error(data.error || 'Failed to generate');
             }
         } catch {
-            // Log generic error internally if needed
             toast.error("AI connection spotty. Using offline inspiration! ✨");
             const FALLBACKS = [
                 `Thinking of you, ${activeContact.name}! Hope your day is going great. 💕`,
@@ -173,47 +200,87 @@ export function EchoEngineDrawer() {
     const handleSetReminder = async () => {
         if (!activeContact) return;
 
-        try {
-            // Request permissions first
-            const status = await LocalNotifications.requestPermissions();
+        const [hours, minutes] = reminderTime.split(':').map(Number);
+        const now = new Date();
+        const title = `Time to water ${activeContact.name}! 💕`;
+        const body = "Tap to send a loving message";
 
-            if (status.display === 'granted') {
-                const [hours, minutes] = reminderTime.split(':').map(Number);
-                const now = new Date();
-                const title = `Time to water ${activeContact.name}! 💕`;
+        // Calculate schedule time
+        const scheduleTime = new Date();
+        scheduleTime.setHours(hours, minutes, 0, 0);
+        if (scheduleTime <= now) {
+            scheduleTime.setDate(scheduleTime.getDate() + 1);
+        }
 
-                // Schedule logic
-                const scheduleTime = new Date();
-                scheduleTime.setHours(hours, minutes, 0, 0);
+        const isNative = Capacitor.isNativePlatform();
 
-                if (scheduleTime <= now) {
-                    scheduleTime.setDate(scheduleTime.getDate() + 1);
-                }
-
-                await LocalNotifications.schedule({
-                    notifications: [
-                        {
-                            title: title,
-                            body: "Tap to send a loving message",
+        if (isNative) {
+            // Native Android/iOS - use LocalNotifications
+            try {
+                const status = await LocalNotifications.requestPermissions();
+                if (status.display === 'granted') {
+                    await LocalNotifications.schedule({
+                        notifications: [{
+                            title,
+                            body,
                             id: Math.floor(Math.random() * 1000000),
                             schedule: { at: scheduleTime },
                             sound: "echolove_chime.wav",
                             actionTypeId: "",
-                            extra: {
-                                contactId: activeContact.id
-                            }
-                        }
-                    ]
-                });
-
-                toast.success(`Reminder set for ${reminderTime}! 🔔`);
-                setShowReminder(false);
-            } else {
-                toast.error("Notifications permission denied");
+                            extra: { contactId: activeContact.id }
+                        }]
+                    });
+                    toast.success(`Reminder set for ${reminderTime}! 🔔`);
+                    setShowReminder(false);
+                } else {
+                    toast.error("Notifications permission denied");
+                }
+            } catch {
+                toast.error("Failed to schedule notification");
             }
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to schedule notification");
+        } else {
+            // Web/PWA - use Notification API + localStorage
+            try {
+                if (!("Notification" in window)) {
+                    toast.error("This browser doesn't support notifications");
+                    return;
+                }
+
+                const permission = await Notification.requestPermission();
+                if (permission === "granted") {
+                    // Store reminder in localStorage for persistence
+                    const reminders = JSON.parse(localStorage.getItem('echolove_reminders') || '[]');
+                    reminders.push({
+                        id: Date.now(),
+                        contactId: activeContact.id,
+                        contactName: activeContact.name,
+                        time: reminderTime,
+                        scheduledFor: scheduleTime.toISOString()
+                    });
+                    localStorage.setItem('echolove_reminders', JSON.stringify(reminders));
+
+                    // Calculate delay until notification
+                    const delay = scheduleTime.getTime() - now.getTime();
+
+                    // If within 24 hours, set a timeout (will work while tab is open)
+                    if (delay > 0 && delay < 86400000) {
+                        setTimeout(() => {
+                            new Notification(title, {
+                                body,
+                                icon: '/icons/icon-192x192.png',
+                                tag: `echolove-${activeContact.id}`
+                            });
+                        }, delay);
+                    }
+
+                    toast.success(`Reminder set for ${reminderTime}! 🔔`);
+                    setShowReminder(false);
+                } else {
+                    toast.error("Please allow notifications in your browser");
+                }
+            } catch {
+                toast.error("Failed to set reminder");
+            }
         }
     };
 

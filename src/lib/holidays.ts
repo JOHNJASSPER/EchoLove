@@ -25,9 +25,13 @@ export function getUpcomingHolidays(daysToCheck: number = 30): Holiday[] {
     const fixedHolidays = [
         { name: "New Year's Day", month: 0, day: 1 },
         { name: "Valentine's Day", month: 1, day: 14 },
-        { name: "Independence Day", month: 6, day: 4 },
-        { name: "Christmas Day", month: 11, day: 25 },
+        { name: "Siblings Day", month: 3, day: 10 },
+        { name: "Intl. Children's Day", month: 5, day: 1 },
+        { name: "Best Friends Day", month: 5, day: 8 },
+        { name: "Girlfriend Day", month: 7, day: 1 },
+        { name: "Boyfriend Day", month: 9, day: 3 },
         { name: "Halloween", month: 9, day: 31 },
+        { name: "Christmas Day", month: 11, day: 25 },
     ];
 
     // Helper to add fixed holidays for a given year
