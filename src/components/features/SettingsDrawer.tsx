@@ -33,8 +33,8 @@ export function SettingsDrawer() {
             await db.interactions.clear();
             await db.drafts.clear();
 
-            // Clear auth data
-            localStorage.removeItem('echolove-auth');
+            // Clear ALL local storage (auth, reminders, preferences)
+            localStorage.clear();
 
             toast.success("All data cleared");
 
