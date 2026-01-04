@@ -33,10 +33,19 @@ export function EchoEngineDrawer() {
     const hasEmail = Boolean(activeContact?.email);
     const hasAnyContact = hasPhone || hasEmail;
 
+    import { getUpcomingHolidays } from '@/lib/holidays';
+
+    // ... (inside component)
+
     const generateEcho = async () => {
         if (!activeContact) return;
         setIsGenerating(true);
         setIsManual(false);
+
+        // Check for holidays happening TODAY (range 0 means today)
+        const todaysHolidays = getUpcomingHolidays(0);
+        const activeHoliday = todaysHolidays.length > 0 ? todaysHolidays[0].name : null;
+
         try {
             // Add timestamp to prevent aggressive mobile caching
             const response = await fetch(`/api/echo?ts=${Date.now()}`, {
@@ -47,6 +56,7 @@ export function EchoEngineDrawer() {
                     contactName: activeContact.name,
                     relationship: activeContact.relationship,
                     vibe: vibe,
+                    holiday: activeHoliday // Pass the holiday context
                 }),
             });
 

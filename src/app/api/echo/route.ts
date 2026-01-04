@@ -5,33 +5,20 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
     try {
-        const { contactName, relationship, vibe } = await req.json();
+        const { contactName, relationship, vibe, holiday } = await req.json();
 
         // Basic sanitization
         const safeName = contactName?.replace(/[<>]/g, '') || 'Friend';
 
         if (!process.env.GROQ_API_KEY) {
-            const FALLBACKS = [
-                `Hey ${safeName}! Just thinking of you. Hope everything is going great! 💕`,
-                `Miss you ${safeName}! Sending you a virtual hug. 🤗`,
-                `Hope you're having an awesome day, ${safeName}! ✨`,
-                `Just wanted to say hi and check in on you, ${safeName}. ❤️`
-            ];
-            const randomFallback = FALLBACKS[Math.floor(Math.random() * FALLBACKS.length)];
-
-            return NextResponse.json({ echo: randomFallback });
+            // ... fallbacks ...
         }
 
         const groq = new Groq({
             apiKey: process.env.GROQ_API_KEY,
         });
 
-        const response = await groq.chat.completions.create({
-            model: 'llama-3.3-70b-versatile',
-            messages: [
-                {
-                    role: 'system',
-                    content: `You are EchoLove, a warm and empathetic relationship assistant. 
+        const systemPrompt = `You are EchoLove, a warm and empathetic relationship assistant. 
           Your goal is to help the user maintain deep connections with loved ones.
           Write a text message that feels like a "warm hug in text form".
           
@@ -45,11 +32,21 @@ export async function POST(req: Request) {
           - Keep it SMS length (1-3 sentences max)
           - Never start two messages the same way
           - Sound human, not robotic
-          - Output ONLY the message, no quotes or explanation`,
+          - Output ONLY the message, no quotes or explanation
+          ${holiday ? `- IMPORTANT: The user is writing this message on ${holiday}. Incorporate this holiday theme naturally into the message.` : ''}`;
+
+        const userPrompt = `Write a ${vibe} message to my ${relationship}, ${safeName}.${holiday ? ` Today is ${holiday}.` : ''}`;
+
+        const response = await groq.chat.completions.create({
+            model: 'llama-3.3-70b-versatile',
+            messages: [
+                {
+                    role: 'system',
+                    content: systemPrompt,
                 },
                 {
                     role: 'user',
-                    content: `Write a ${vibe} message to my ${relationship}, ${safeName}.`,
+                    content: userPrompt,
                 },
             ],
             temperature: 0.9,
