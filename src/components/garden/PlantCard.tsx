@@ -54,17 +54,17 @@ export function PlantCard({ contact, onClick }: PlantCardProps) {
                 className={cn(
                     "relative w-full aspect-[4/5] rounded-3xl overflow-hidden border transition-all duration-500 cursor-pointer",
                     isWilting
-                        ? "glass opacity-70 border-gray-200 grayscale-[0.5]"
-                        : "glass-card border-white/60 shadow-lg shadow-rose-500/10"
+                        ? "opacity-70 border-gray-300 grayscale-[0.5] bg-gray-100 shadow-md"
+                        : "border-gray-200 shadow-xl shadow-gray-300/50 bg-white"
                 )}
             >
                 {/* Background Gradient based on Vibe */}
                 <div className={cn(
-                    "absolute inset-0 opacity-20 bg-gradient-to-br",
-                    contact.vibe === 'sweet' ? "from-rose-400 to-orange-300" :
-                        contact.vibe === 'chill' ? "from-blue-300 to-green-200" :
-                            contact.vibe === 'deep' ? "from-indigo-400 to-purple-300" :
-                                "from-yellow-300 to-pink-300"
+                    "absolute inset-0 opacity-40 bg-gradient-to-br",
+                    contact.vibe === 'sweet' ? "from-rose-300 to-orange-200" :
+                        contact.vibe === 'chill' ? "from-blue-200 to-emerald-100" :
+                            contact.vibe === 'deep' ? "from-indigo-300 to-purple-200" :
+                                "from-yellow-200 to-pink-200"
                 )} />
 
                 {/* Content */}
