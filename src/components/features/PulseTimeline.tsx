@@ -40,7 +40,7 @@ export function PulseTimeline() {
         .filter((b) => b.daysUntil <= 30);
 
     // 2. Calculate Holidays
-    const holidays = getUpcomingHolidays(30);
+    const holidays = getUpcomingHolidays(60);
     const upcomingHolidays: PulseItem[] = holidays.map(h => {
         const hDate = new Date(h.date);
         hDate.setHours(0, 0, 0, 0);

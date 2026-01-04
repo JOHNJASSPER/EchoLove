@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
 import { sendSMS } from '@/lib/platform';
+import { LocalNotifications } from '@capacitor/local-notifications';
 
 export function EchoEngineDrawer() {
     const { activeContact, isEngineOpen, setEngineOpen } = useAppStore();
@@ -165,39 +166,47 @@ export function EchoEngineDrawer() {
     const handleSetReminder = async () => {
         if (!activeContact) return;
 
-        // Request notification permission
-        if ('Notification' in window) {
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                // Calculate time until reminder
+        try {
+            // Request permissions first
+            const status = await LocalNotifications.requestPermissions();
+
+            if (status.display === 'granted') {
                 const [hours, minutes] = reminderTime.split(':').map(Number);
                 const now = new Date();
-                const reminderDate = new Date();
-                reminderDate.setHours(hours, minutes, 0, 0);
+                const title = `Time to water ${activeContact.name}! 💕`;
 
-                // If time has passed today, set for tomorrow
-                if (reminderDate <= now) {
-                    reminderDate.setDate(reminderDate.getDate() + 1);
+                // Schedule logic
+                let scheduleTime = new Date();
+                scheduleTime.setHours(hours, minutes, 0, 0);
+
+                if (scheduleTime <= now) {
+                    scheduleTime.setDate(scheduleTime.getDate() + 1);
                 }
 
-                const msUntilReminder = reminderDate.getTime() - now.getTime();
-
-                // Schedule the notification
-                setTimeout(() => {
-                    new Notification(`Time to water ${activeContact.name}! 💕`, {
-                        body: 'Send them a loving message',
-                        icon: '/icon-192.png',
-                        tag: `reminder-${activeContact.id}`,
-                    });
-                }, msUntilReminder);
+                await LocalNotifications.schedule({
+                    notifications: [
+                        {
+                            title: title,
+                            body: "Tap to send a loving message",
+                            id: Math.floor(Math.random() * 1000000),
+                            schedule: { at: scheduleTime },
+                            sound: "beep.wav",
+                            actionTypeId: "",
+                            extra: {
+                                contactId: activeContact.id
+                            }
+                        }
+                    ]
+                });
 
                 toast.success(`Reminder set for ${reminderTime}! 🔔`);
                 setShowReminder(false);
             } else {
-                toast.error("Please enable notifications in your browser");
+                toast.error("Notifications permission denied");
             }
-        } else {
-            toast.error("Notifications not supported in this browser");
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to schedule notification");
         }
     };
 
