@@ -43,7 +43,7 @@ export function RemindersDrawer() {
     return (
         <Drawer>
             <DrawerTrigger asChild>
-                <button className="p-2 rounded-full hover:bg-gray-100 transition-colors relative">
+                <button className="p-2 rounded-full hover:bg-gray-100 transition-colors relative" aria-label="View reminders">
                     <Bell className="w-5 h-5 text-gray-600" />
                     {reminders.length > 0 && (
                         <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 rounded-full text-[10px] text-white flex items-center justify-center">
@@ -93,6 +93,7 @@ export function RemindersDrawer() {
                                     <button
                                         onClick={() => deleteReminder(reminder.id)}
                                         className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                                        aria-label="Delete reminder"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
