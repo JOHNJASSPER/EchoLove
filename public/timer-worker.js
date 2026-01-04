@@ -1,27 +1,32 @@
+let reminders = [];
+let intervalId = null;
+
 self.onmessage = function (e) {
-    const { reminders } = e.data;
+    if (e.data.reminders) {
+        reminders = e.data.reminders;
+    }
 
-    if (!reminders || reminders.length === 0) return;
+    // Start interval if not running
+    if (!intervalId) {
+        intervalId = setInterval(() => {
+            if (!reminders || reminders.length === 0) return;
 
-    // Check every second
-    const checkId = setInterval(() => {
-        const now = new Date();
-        const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            const now = new Date();
+            const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            const currentSeconds = now.getSeconds();
 
-        // Find due reminders
-        // We check if the reminder time matches current HH:mm AND it hasn't fired yet
-        // Since we check every second, we need to be careful not to fire multiple times in that minute
-        // Ideally the main thread handles the "has fired" logic, effectively removing it from the active list
+            // Check if we hit the top of the minute (approx) to avoid firing every second of that minute
+            // OR the firing logic needs to trigger once per matching minute.
+            // Since the main thread removes the reminder after firing, firing every second until removal is safer
+            // to ensure the message gets through, BUT we should debounce slightly.
+            // Actually, the previous logic relied on main thread removing it.
+            // Let's send it. The main thread will dedup or remove it.
 
-        reminders.forEach(reminder => {
-            if (reminder.time === currentTime) {
-                // Determine if we should fire (simple check: is it the exact minute?)
-                // To avoid spamming, the main thread should unsubscribe/update the worker after firing
-                self.postMessage({ type: 'FIRE', reminder });
-            }
-        });
-    }, 1000);
-
-    // Store id to clear later if needed (though for now we just let it run)
-    // self.intervalId = checkId;
+            reminders.forEach(reminder => {
+                if (reminder.time === currentTime) {
+                    self.postMessage({ type: 'FIRE', reminder });
+                }
+            });
+        }, 1000);
+    }
 };

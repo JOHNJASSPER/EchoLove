@@ -14,6 +14,13 @@ interface Reminder {
     scheduledFor: string;
 }
 
+
+declare global {
+    interface Window {
+        timerWorker: Worker;
+    }
+}
+
 export function RemindersDrawer() {
     const [reminders, setReminders] = useState<Reminder[]>([]);
 
@@ -28,6 +35,11 @@ export function RemindersDrawer() {
                 setReminders(future);
                 // Update localStorage with only future reminders
                 localStorage.setItem('echolove_reminders', JSON.stringify(future));
+
+                // Sync with worker if active
+                if (typeof window !== 'undefined' && window.timerWorker) {
+                    window.timerWorker.postMessage({ reminders: future });
+                }
             } catch {
                 setReminders([]);
             }
@@ -38,6 +50,11 @@ export function RemindersDrawer() {
         const updated = reminders.filter(r => r.id !== id);
         setReminders(updated);
         localStorage.setItem('echolove_reminders', JSON.stringify(updated));
+
+        // Sync with worker
+        if (typeof window !== 'undefined' && window.timerWorker) {
+            window.timerWorker.postMessage({ reminders: updated });
+        }
     };
 
     return (

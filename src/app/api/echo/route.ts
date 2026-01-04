@@ -32,6 +32,13 @@ const MESSAGE_TEMPLATES: Record<string, { systemExtra: string; examples: string[
             "Hey! Just wanted to check in and see how you're doing. Thinking of you! 😊",
             "Miss you! How's everything going? Would love to catch up soon. 💭",
         ]
+    },
+    holiday: {
+        systemExtra: `This is a SPECIAL HOLIDAY message! Make it festive, warm, and appropriate for the specific occasion. Use relevant emojis. Focus on sharing good wishes and celebrating the spirit of the holiday.`,
+        examples: [
+            "Happy [Holiday]! 🎄 Wishing you joy, warmth, and lots of happiness today! ✨",
+            "Sending you big holiday hugs! 🤗 Hope you have a wonderful [Holiday] filled with love! 💖",
+        ]
     }
 };
 

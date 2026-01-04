@@ -8,7 +8,7 @@ import { AddContactDrawer } from '@/components/features/AddContactDrawer';
 import { EchoEngineDrawer } from '@/components/features/EchoEngineDrawer';
 import { PulseTimeline } from '@/components/features/PulseTimeline';
 import { SettingsDrawer } from '@/components/features/SettingsDrawer';
-import { EventBanner } from '@/components/features/EventBanner';
+
 import { SeedFrame } from '@/components/features/SeedFrame';
 import { CalendarDrawer } from '@/components/features/CalendarDrawer';
 import { RemindersDrawer } from '@/components/features/RemindersDrawer';
@@ -50,7 +50,7 @@ export default function GardenPage() {
                 </header>
 
                 {/* Event Banner - Shows when there's a special day */}
-                <EventBanner />
+
 
                 {/* The Pulse - Upcoming Events */}
                 <SeedFrame title="The Pulse" icon={<Sparkles className="w-4 h-4" />}>

@@ -32,9 +32,14 @@ export function SettingsDrawer() {
             await db.contacts.clear();
             await db.interactions.clear();
             await db.drafts.clear();
+
+            // Clear auth data
+            localStorage.removeItem('echolove-auth');
+
             toast.success("All data cleared");
-            setShowClearConfirm(false);
-            setSettingsOpen(false);
+
+            // Hard reload to reset state and send to login
+            window.location.href = '/login';
         } catch {
             toast.error("Failed to clear data");
         }
@@ -116,6 +121,12 @@ export function SettingsDrawer() {
                                         <p className="text-sm text-gray-600">
                                             EchoLove uses AI to help craft the perfect message for your loved ones.
                                         </p>
+                                        <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                                            <span className="text-xs font-medium text-gray-500">Powered by</span>
+                                            <span className="text-sm font-bold text-orange-600 flex items-center gap-1">
+                                                ⚡ Groq
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
